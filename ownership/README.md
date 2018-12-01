@@ -28,9 +28,8 @@ finds an empty spot somewhere that is big enough, **marks it as in use** and ret
 you can store the pointer on the stack but to get the actual data, you have to follow the pointer.
 
 >  Heap analogy -
-
-> Think of being seated at a restaurant. When you enter, you state the number of people in your > group, and the staff finds an empty table that fits everyone and leads you there. If someone in your group comes late, they can ask where you’ve been seated to find you.
-> Consider a server at a restaurant taking orders from many tables. It’s most efficient to get >all the orders at one table before moving on to the next table. Taking an order from table A, then an order from table B, then one from A again, and then one from B again would be a much slower process. By the same token, a processor can do its job better if it works on data that’s close to other data (as it is on the stack) rather than farther away (as it can be on the heap). 
+> Think of being seated at a restaurant. When you enter, you state the number of people in your  group, and the staff finds an empty table that fits everyone and leads you there. If someone in your group comes late, they can ask where you’ve been seated to find you.
+Consider a server at a restaurant taking orders from many tables. It’s most efficient to get all the orders at one table before moving on to the next table. Taking an order from table A, then an order from table B, then one from A again, and then one from B again would be a much slower process. By the same token, a processor can do its job better if it works on data that’s close to other data (as it is on the stack) rather than farther away (as it can be on the heap). 
 > Allocating a large amount of space on the heap can also take time.
 
 Accessing data in the heap is slower because you have to follow a pointer to get to the data.
