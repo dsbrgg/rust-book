@@ -28,7 +28,7 @@ name | value
 ---- | -----
 pointer | 0x9f9f9f
 
-**reference from value passed to the function (&s1)**
+**reference from value passed to the function (&s1) :point_down:**
 
 name | value
 ---- | -----
@@ -36,7 +36,7 @@ pointer  | 0x9f9f9f
 len      | 5
 capacity | 5 
 
-**memory address (0x9f9f9f)**
+**memory address (0x9f9f9f) :point_down:**
 
 index | value
 ----- | -----
