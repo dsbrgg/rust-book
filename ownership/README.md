@@ -211,3 +211,13 @@ error[E0382]: use of moved value: `s1`
   = note: move occurs because `s1` has type `std::string::String`, which does
   not implement the `Copy` trait
 ```
+
+The concept of copying the pointer, length and capacity without copying the data probably sounds
+like making a *shallow copy* but, because Rust also invalidates the first variable, it is called 
+a *move* instead. We would read this assignment as `s1` being moved into `s2`.
+
+There's also a design choice that's implied here: Rust will never automcatically create a "deep"
+copy of your data. Any *automatic* copying can be assumed to be inexpensive in terms of runtime
+performance.
+
+## Ways Variables and Data Interact: Clone
