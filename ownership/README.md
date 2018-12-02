@@ -221,3 +221,60 @@ copy of your data. Any *automatic* copying can be assumed to be inexpensive in t
 performance.
 
 ## Ways Variables and Data Interact: Clone
+
+If a ddep copy of the heap data is wanted and not only the stack data, we can use a common method called `clone`.
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1.clone();
+
+println!("s1 = {}, s2 = {}", s1, s2);
+```
+
+This will make the heap data be copied over from `s1` to `s2`. When you use `clone`, you know
+that some arbitrary code is being executed and that code may be expensive.
+
+## Stack-Only Data: Copy
+
+Rust has a special annotation called `Copy` that can be placed on types like integers that
+are stored on the stack. If a type has the `Copy` trait, an older variable is still usable
+after assignment. It won't let us annoatate a type with the `Copy` trati if the type, or any
+of its parts has implemented the `Drop` trait. *Appendix C - Derivable Traits* goes more in depth
+about the `Copy` annotation to your type.
+
+As a general rule, any gorup of simple scalar values can be `Copy` and nothing that requires allocation or is some form of resource is `Copy`. Some types that are `Copy`:
+
+- All integers
+- Booleans
+- Floating points
+- Characters
+- Tuples which contain only `Copy` types(eg. `(u32, f64)`)
+
+## Ownership and Functions
+
+```rust
+fn main() {
+  let s = String::from("hello"); // s comes into scope
+
+  takes_ownership(s);  // s value moves into the function
+                      // so is no longer valid here
+
+  let x = 5;        // x comes into scope
+
+  makes_copy(x);   // x would move into the function
+                  // but i32 is COpy, so it's okay to still
+                 // use x afterward
+} // Here x goes out fo scope, then s. But because s value was moved, nothing
+ // special happens
+
+fn takes_ownership(some_string: String) { // some_string comes into scope
+  printlen!("{}", some_string);
+} // Here some_string goes ot of scope and `drop` is called. The backing memory is freed
+
+fn makes_copy(some_integer: i32) { // some_integer comes into scope
+  printlen!("{}", some_integer);
+} // Here, some_integer goes out of scope. Nothing special happens.
+```
+
+## Return Values and Scope
+
