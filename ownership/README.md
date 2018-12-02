@@ -45,3 +45,51 @@ minimizing the amount of duplicate data on the heap and cleaningup unused data o
 run out of space are all problems addressed on the ownership feature.
 
 ## Ownership Rules
+
+1. Each value in Rust has a variable that's called its owner.
+2. There can only be one owner at a time.
+3. when the owner does out of scope, the value will be dropped.
+
+## Variable Scope
+
+```rust
+{                   // s is not valid here, not declared
+  let s = "hello"; // s is valid from this point forward
+}                 // this scope is over,s is no longer valid 
+```
+
+- When **s** comes *into scope*, it is valid.
+- It remains valid until it goes *out of scope*.
+
+## The `String` Type
+
+For a better understanding of how Rust handles data stored on the heap
+and how it cleans up data, we will have to look into a more complex data types.
+
+We will focus on the parts of `String` that relate to ownership.
+These aspects also apply to other complex data types provided by the standard
+library and the ones you will be creating.
+
+String literals are convenient but not suitable for all situations. They are immutable and
+not every string can be known when we write code (eg. user input string). For that,
+Rust has a `String` type which is allocated on the heap and because of that is able to 
+store an amount of text that is unknown to us at compile time. The `::` you will see next
+is used to allow calling a particular function (`from`) under the `String` type (method calling).
+
+```rust
+let s = String::from("hello");
+```
+
+This string just created can be muted.
+
+```rust
+let mut s = String::from("hello");
+
+s.push_str("", "world!");
+
+println!("{}", s);
+```
+
+The difference here from string literals is how they deal with memory.
+
+## Memory Allocation
