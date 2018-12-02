@@ -178,3 +178,43 @@ However, multiple immutable references are okay because no one who is just readi
 the ability to affect anyone else's reading of the data.
 
 ## Dangling References
+
+Languages with pointers have a common situation where you may create a *dangling pointer*, 
+whic is a pointer that references a location in memory that may have been given to someone
+else, by freeing some memory while presenving a pointer to that memory. In Rust the compiler
+guarantees that references will never be dangling references: if you have reference to some data,
+the data will not go out of scope before the reference to the data goes.
+
+Let's see an example:
+
+```rust
+fn main() {
+  let reference_to_nothing = dangle();
+}
+
+fn dangle() -> &String { // dangle returns a reference to a String
+  let s = String::from("hello");
+
+  &s  // we return a reference to the String, s
+}    // Here, s goes out of scope, and is dropped. Its memory goes away.
+    // Danger!
+```
+
+Error:
+
+```
+error[E0106]: missing lifetime specifier
+ --> dangle.rs:5:16
+  |
+5 | fn dangle() -> &String {
+  |                ^ expected lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but there is
+  no value for it to be borrowed from
+  = help: consider giving it a 'static lifetime
+```
+
+**The Rules of References**
+
+- At any given time, you can have either (but not both of) one mutable reference or any number of immutable references.
+- References must always be valid.
