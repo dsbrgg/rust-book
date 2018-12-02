@@ -166,9 +166,9 @@ index | value
 3     | l
 4     | o
 
-> Quick note 
-> -> len: how much memory, in bytes, the contents of the `String` is currently using.
-> -> capacity: the total amount of memory, in bytes, that the `String` has received from the OS.
+> Quick note
+-> len: how much memory, in bytes, the contents of the `String` is currently using.
+-> capacity: the total amount of memory, in bytes, that the `String` has received from the OS.
 
 The difference between length and capacity matters, but not for now. :smirk:
 
