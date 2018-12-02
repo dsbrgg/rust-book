@@ -156,7 +156,7 @@ pointer  | 0x283u28
 len      | 5
 capacity | 5
 
-**memory from s1 :point_down:**
+**memory at 0x283u28 :point_down:**
 
 index | value
 ----- | -----
@@ -166,3 +166,48 @@ index | value
 3     | l
 4     | o
 
+> Quick note 
+> -> len: how much memory, in bytes, the contents of the `String` is currently using.
+> -> capacity: the total amount of memory, in bytes, that the `String` has received from the OS.
+
+The difference between length and capacity matters, but not for now. :smirk:
+
+When we assign `s1` to `s2`, the `String` data is copied, meaning we copy the pointer, the length
+and the capacity that are on the stack. Meaning that the table for **s1 group data** would be
+*exactly the same* for **s2 group data** (both point to the same location in memory).
+
+This representation is *not* the same as if the heap data was copied as well. `s2` would have
+another pointer and doing operations like `s2 = s1` could be very expensive in terms of runtime
+performance if data on the heap were large.
+
+In this exact situation we're dealing with, we would also have a bug. Because Rust calls `drop`
+on the end of the function body, both `s1` and `s2` will try to free the same memory.
+This is the *double free* mentioned earlier and is one of the memory safety bugs Rust
+tries to prevent to prevent memory corurption and security vulnerabilities.
+
+Since we're using Rust, it will automatically interpret this assignment as `s1` no longer being
+valid and therefore, Rust doesn't need to free anything when `s1` goes out of scope. If you try
+to `s1` after `s2` is created, it won't work:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+
+println!("{}, world!", s1);
+```
+
+An error will occur because Rust prevents you from using an invalidated reference:
+
+```
+error[E0382]: use of moved value: `s1`
+ --> src/main.rs:5:28
+  |
+3 |     let s2 = s1;
+  |         -- value moved here
+4 |
+5 |     println!("{}, world!", s1);
+  |                            ^^ value used here after move
+  |
+  = note: move occurs because `s1` has type `std::string::String`, which does
+  not implement the `Copy` trait
+```
