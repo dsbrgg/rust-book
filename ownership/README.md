@@ -93,3 +93,76 @@ println!("{}", s);
 The difference here from string literals is how they deal with memory.
 
 ## Memory Allocation
+
+String literals are fast and effecient because they are hardcoded directly into the final
+executable. Unfortunately they can't always be used because there's no way to put a
+blob of memory with size unknown and that might change into that piece of variable.
+
+With `String` type, to support a growable/mutable piece of text, we allocate memory 
+on the heap, unknown at compile time, to hold its contents, this means:
+
+- Memory must be requested from the OS at runtime.
+- A way of returning this memory to the OS when we're done, is needed.
+
+In languages with a *garbage collector (GC)*, the GC keeps track and cleans up
+memory that isn't being used anymore and there's no need to think about it.
+Without a GC, it's the programmer responsability to identify when memory is no
+longer being used and call code to explicitly return it. This had been a historical
+difficulty for programmers because:
+
+- If you forget about it, you'll waste memory;
+- If you do it too early, you'll have an invalid variable;
+- If you do it twice, it's a bug too.
+
+For all `allocate` there should be its pair, which is `free`.
+
+In Rust, a different path is taken. Memory is automatically returned once th variable
+that owns it goes out of scope.
+
+There's a natural point we can return the memory our `String` needs to the operating system that
+is when the variable goes out of scope. Rust has a specific function for this action which is
+`drop`. It is called automatically at the closing body (`}`).
+
+> Note: In C++, this pattern of deallocating resources at the end of an item’s lifetime is sometimes called Resource Acquisition Is Initialization (RAII). The drop function in Rust will be familiar to you if you’ve used RAII patterns.
+
+## Ways Variables and Data Interact: Move
+
+Lets look an example with integers:
+
+```rust
+let x = 5;
+let y = x;
+```
+
+Since these are two simple values with a known, fixed size, these two has `5` as a value which are pushed onto the stack.
+
+Now, a `String` version:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1;
+```
+
+Even though this looks exactly as the previous example, it is not.
+Under de cofers, a `String` is made up of three parts: a pointer to the memory that
+holds the contents of the string, a length and a capacity. This group of data is stored
+on the stack. The memory on the heap is the one with the actual contents:
+
+**s1 group data :point_down:**
+
+name | value
+---- | ------
+pointer  | 0x283u28
+len      | 5
+capacity | 5
+
+**memory from s1 :point_down:**
+
+index | value
+----- | -----
+0     | h
+1     | e
+2     | l
+3     | l
+4     | o
+
