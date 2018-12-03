@@ -22,8 +22,7 @@ fn main() {
     counter += 1;
 
     if counter < seconds {
-      print!("{}", counter);
-      print!("\r");
+      print!("{}\r", counter);
       io::stdout().flush().ok().expect("Could not flush stdout");
     } else {
       break;
