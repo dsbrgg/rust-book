@@ -41,3 +41,43 @@ let mut use1 = User {
 user1.email = String::from("anotheremail@example.com");
 ```
 
+Using struct update syntax, we can achieve the same effect with less code. The syntax
+`..` specifies the fields not explicitly set should have the same value as in the given
+instance.
+
+```rust
+let user2 = User {
+  email: String::from("blabla@bla.com"),
+  username: String::from("blabla"),
+  ..use1
+};
+```
+
+## Tuple Structs
+
+Tuple structs have the added meaning the struct name provides but don't have names associated
+with fields; they just have the types of the fields. Notice that each struct is its own type.
+Even if the types are composed by the same values, they are different entities.
+
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+let black = Color(0, 0, 0);
+let origin = Point(0, 0, 0);
+```
+
+Tuple structs behave like tuples: you can destructure them into individual pieces, you can use
+`.` to point for its index to access individual values and so on.
+
+## Unit-Like Structs Without Fields
+
+You can define structs that don't have fields. They are called *unit-like structs* because
+they behave similarly to `()`, the unit type. Useful to implement traits on some type you don't
+have any data to store in the type itself.
+
+## Structs and Ownership
+
+In the examples above, we've used `String` type, instead of a `&str` reference, to make sure the structs instances would own their data and for it to be valid as long as the entire struct instance is also valid.
+
+It's possible to store references to data owned by something else but to do so, it requires use of lifetimes.
