@@ -17,7 +17,7 @@ ownership of `self`, borrow `self` immutably as we've done on the program or bor
 
 ## Where's the `->` Operator
 
-C and C++ have two operators for calling methods: `.` if you're calling a method on the object directly and `->` if you're calling the method on a pointer to the object and need to dereference the pointer first. In other words, it `object` is a pointer: `object-something()` is similar to `(*object).something()`.
+C and C++ have two operators for calling methods: `.` if you're calling a method on the object directly and `->` if you're calling the method on a pointer to the object and need to dereference the pointer first. In other words, it `object` is a pointer: `object->something()` is similar to `(*object).something()`.
 
 Rust doesn't have and equivalent of `->` because it has a feature called *automatic referencing and derefencing*.
 
