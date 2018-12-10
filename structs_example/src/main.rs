@@ -8,9 +8,15 @@ impl Rectangle {
   fn area(&self) -> u32 {
     self.width * self.height
   }
+
+  fn can_hold(&self, other: &Rectangle) -> bool {
+    self.area() >= other.area()
+  }
 }
 
 fn main() {
+  println!("=========================\n");
+
   let width1 = 30;
   let height1 = 50;
 
@@ -19,7 +25,7 @@ fn main() {
     area(width1, height1)
   );
 
-  println!("=========================");
+  println!("=========================\n");
 
   let rect1 = Rectangle { width: 30, height: 50 };
 
@@ -30,7 +36,7 @@ fn main() {
     area_as_struct(&rect1)
   );
 
-  println!("=========================");
+  println!("=========================\n");
 
   let rect2 = Rectangle { width: 50, height: 50 };
 
@@ -39,6 +45,13 @@ fn main() {
   println!(
     "The area of the rectangle is {} square pixels.", 
     rect2.area()
+  );
+
+  println!("=========================\n");
+
+  println!(
+    "Rect1 can hold rect2? Answer: {}",
+    rect1.can_hold(&rect2)
   );
 }
 
