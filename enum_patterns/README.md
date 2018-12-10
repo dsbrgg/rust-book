@@ -85,3 +85,28 @@ Rust doesn't have the *Null* feature that many other languages have. *Null* is a
 > Trivia: Tony Hoare, the inventor of null, said that implementing a null reference was a big mistake.
 
 The problem with null values is that if you try to use a null value as a not-null value, you'll get an error of some kind.
+
+However the concept that null is trying to express is still a useful one: null is a value that is currently invalid or absent for some reason.
+
+Hence `Options`:
+
+```rust
+enum Option<T> {
+  Some(T),
+  None,
+}
+```
+
+`Option<T>` is so useful you don't even have to include into scope. You can also use `Some` and `None` directly without the `Option::` prefix.
+
+The `<T>` syntax is a feature of Rust called a genery type parameter. It will be covered later.
+
+```rust
+let some_number = Some(5);
+let some_string = Some("a string");
+
+let absent_number: Option<i32> = None;
+```
+
+If `None` is used, we need to tell Rust what type of `Option<T>` we have. The compiler can't infer the type that the `Some` variant will hold by looking at a `None` value.
+
