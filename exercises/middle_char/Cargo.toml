@@ -1,0 +1,6 @@
+[package]
+name = "middle_char"
+version = "0.1.0"
+authors = ["opuzzz <dsbrgg@gmail.com>"]
+
+[dependencies]
