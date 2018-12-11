@@ -33,3 +33,7 @@ fn returns_expected() {
   assert_eq!(count_bits(9), 2);
   assert_eq!(count_bits(10), 2);
 }
+
+// >> will divide by 2
+// << will multiply by 2
+fn test_shift() -> i64 { 6 >> 1 }
