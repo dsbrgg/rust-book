@@ -110,3 +110,29 @@ let absent_number: Option<i32> = None;
 
 If `None` is used, we need to tell Rust what type of `Option<T>` we have. The compiler can't infer the type that the `Some` variant will hold by looking at a `None` value.
 
+```rust
+let x: i8 = 5;
+let y: Option<i8> = Some(5);
+
+let sum = x + y;
+```
+
+Code above returns the following error:
+
+```
+error[E0277]: the trait bound `i8: std::ops::Add<std::option::Option<i8>>` is
+not satisfied
+ -->
+  |
+5 |     let sum = x + y;
+  |                 ^ no implementation for `i8 + std::option::Option<i8>`
+```
+
+When we have a value of type like `i8` is Rust, the compiler will ensure that we always have a valid value. We can proceed confidently without having to check for null before using that value.
+Only when we have an `Option<T>` de we have to worry about possibly not having a value, and the compiler will make sure we handle that case before using the value.
+
+You have to convert `Option<T>` into a `T` before you can perform `T` operations. This helps
+catching one common issue with null: assuming that something ins't null when it actually is.
+
+In order to use an `Option<T>` value, you want to have code that will handle each variant.
+You want some code that will run only when you have a `Some(T)` value, and this code is allowed to use the inner `T`. You want some other code to run if you have a `None` value, and that code doesn't have a `T` value available. The `match` expression is a control flow construct that does just this when used with enums: it will run different code depending on which variant of the enum it has, and that code can use the data inside the matching value.
