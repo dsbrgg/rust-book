@@ -142,3 +142,41 @@ You want some code that will run only when you have a `Some(T)` value, and this 
 `match` allows to compare a value against a series of patterns and execute code based on these.
 It's like a coin-sorting machine: coins slide down a track with variously holes along it, and each coin falls through the first hole it encounters that fits into.
 
+When a `match` pattern expression executes, it compares the resulting value agaisnt the pattern of each arm, in order. If a pattern matches the value, the code associated with that pattern is executed. The code within each arm is an expression, and the resulting value of the expression in the matching arm is the value that gets returned for the entire `match` expression.
+
+## Matching with `Option<T>`
+
+```rust
+fn plus_one(x: Option<i32>) -> Option<i32> {
+  match x {
+    None => None,
+    Some(i) => Some(i + 1),
+  }
+}
+
+let five = Some(5);
+let six = plus_one(five);
+let none = plus_one(None);
+```
+
+## Matches are Exhaustive
+
+With `match` we must exhaust every last possibility in order for the code to be valid. Especially in the case of `Option<T>`, when Rust prevents us from forgetting to explicitly handle the `None` case, it protects us from assuming that we have a value when we might have null.
+
+## The `_` Placeholder
+
+The `_` will match any value. By putting it on a `match` it will cover all possible cases that aren't specified before it. The `()` is just the unit value, so nothing will happen in the `_`case.
+
+Example: 
+
+```rust
+let some_u8_value = 0u8;
+
+match some_u8_value {
+  1 => println!("one"),
+  3 => println!("three"),
+  5 => println!("five"),
+  7 => println!("seven"),
+  _ => (),
+}
+```
