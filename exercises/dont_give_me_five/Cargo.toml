@@ -1,0 +1,6 @@
+[package]
+name = "dont_give_me_five"
+version = "0.1.0"
+authors = ["opuzzz <dsbrgg@gmail.com>"]
+
+[dependencies]
