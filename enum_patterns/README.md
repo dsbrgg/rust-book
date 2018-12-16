@@ -136,3 +136,9 @@ catching one common issue with null: assuming that something ins't null when it 
 
 In order to use an `Option<T>` value, you want to have code that will handle each variant.
 You want some code that will run only when you have a `Some(T)` value, and this code is allowed to use the inner `T`. You want some other code to run if you have a `None` value, and that code doesn't have a `T` value available. The `match` expression is a control flow construct that does just this when used with enums: it will run different code depending on which variant of the enum it has, and that code can use the data inside the matching value.
+
+## `match` Control Flow Operator
+
+`match` allows to compare a value against a series of patterns and execute code based on these.
+It's like a coin-sorting machine: coins slide down a track with variously holes along it, and each coin falls through the first hole it encounters that fits into.
+
