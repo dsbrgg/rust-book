@@ -1,28 +1,29 @@
 fn dont_give_me_five(start: isize, end: isize) -> isize {
-  let next = start;
+  let mut d = 0;
 
-  let n = next.to_string();
-  let e = n.len();
-
-  let last: isize = &n[e-1..].parse().unwrap();
-
-  let is_five = last == 5;
-  let less_than_five = last < 5;
-  let greater_than_five = last > 5;
-  
-  match last {
-    5 => println!("Is five"),
-    _ => (),
+  for n in (start..end) {
+    if !n.to_string().contains('5') { d += 1; }
   }
+
+  return d + 1;
 }
 
 // ------------------------------------- main
 
 fn main() {
-  println!("{:#?}", dont_give_me_five(1, 9));
+  returns_expected();
 }
 
-// fn returns_expected() {
-//   assert_eq!(dont_give_me_five(1, 9), 8);
-//   assert_eq!(dont_give_me_five(4, 17), 12);
-// }
+fn returns_expected() {
+  assert_eq!(dont_give_me_five(1, 9), 8);
+  assert_eq!(dont_give_me_five(4, 17), 12);
+}
+
+// start 4, end 22
+//  4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22
+
+// start 5, end 22
+// 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22
+
+// start 6, end 22
+// 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22
