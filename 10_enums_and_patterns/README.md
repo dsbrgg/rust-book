@@ -180,3 +180,29 @@ match some_u8_value {
   _ => (),
 }
 ```
+
+## Concise control flow with `if let`
+
+Example of `match` expression that is too verbose:
+
+```rust
+let some_u8_value = Some(0u8);
+match some_u8_value {
+  Some(3) => println!("three"),
+  _ => (),
+}
+```
+
+The example above is just matching in case of a single variant, all others will execute the default which is nothing in this case. It can be more concise with the following expression:
+
+```rust
+if let Some(3) = some_u8_value {
+  println!("three");
+}
+```
+
+The `=` above is **not** an *assigment* but a comparison that works just like the `match` expression. However, you lose the exhaustive checking that `match` enforces. Consider if gaining conciseness is an appropriate trade-off for losing exhaustive checking.
+
+## Summary
+
+Creating custom types to use in your aPI ensures type safety: the compiler will make certain your functions get only values of the type each function expects.
