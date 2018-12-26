@@ -109,3 +109,34 @@ fn main() {
   sound::intrument::clarinet();
 }
 ```
+
+## Starting Relative Paths with `super`
+
+```rust
+mod instrument {
+  fn clarinet() {
+    super::breathe_in();
+  }
+}
+
+fn breathe_in() {}
+```
+
+The `clarinet` function is in the `instrument` module, so we can use `super` to go to the parent module of `instrument`, which in this case is `crate`, the root. From there, we look for `breathe_in`, and find it.
+
+The reason for using `super` rather than an absolute path with `crate` is that using `super` is more flexible if you update your code to have a different module hierarchy, for example:
+
+```rust
+mod sound {
+  mod instrument {
+    fn clarinet() {
+      super::breathe_in();
+    }
+  }
+
+  fn breathe_in() {}
+}
+```
+
+## Using `pub` with Structs and Enums
+
