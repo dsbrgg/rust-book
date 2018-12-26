@@ -1,0 +1,6 @@
+[package]
+name = "adding_words"
+version = "0.1.0"
+authors = ["opuzzz <dsbrgg@gmail.com>"]
+
+[dependencies]
