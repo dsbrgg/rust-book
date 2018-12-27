@@ -140,3 +140,153 @@ mod sound {
 
 ## Using `pub` with Structs and Enums
 
+Note: On the following example it is seen that because `plant::Vegetable` has a private field, the struct needs to provide a public associated function that constructs an instance of `Vegetable`(used conventional `new` here).
+
+```rust
+mod plant {
+  pub struct Vegetable {
+    pub name: String,
+    id: i32,
+  }
+
+  impl Vegetable {
+    pub fn new(name: &str)  -> Vegetable {
+      name: String::from(name),
+      id: 1,
+    }
+  }
+}
+
+fn main() {
+  let mut v = plant::Vegetable::new("squash");
+
+  v.name = String::from("butternut squash");
+  println!("{} are delicious", v.name);
+
+  // Next line won't compile if uncommented:
+  // println!("The ID is {}", v.id);
+}
+```
+
+Since the enum is set as `pub`, all its variants are accessible.
+
+```rust
+mod menu {
+  pub enum Appetizer {
+    Soup,
+    Salad,
+  }
+}
+
+fn main() {
+  let order1 = menu::Appetizer::Soup;
+  let order2 = menu::Appetizer::Salad;
+}
+```
+
+## `use` keyword to Bring Paths into a Scope
+
+Adding a `use` path in a scope is similar to creating a symbolic link in a filesystem.
+
+```rust
+mod sound {
+  pub mod instrument {
+    pub fn clarinet() {}
+  }
+}
+
+use crate::sound::instrument;
+
+fn main() {
+  instrument::clarinet();
+  instrument::clarinet();
+  instrument::clarinet();
+}
+```
+
+If you want to bring an item into scope with a relative path, instead of starting from a name in the current scope, you must start the path with `self`.
+
+Using absolute paths make updates easier if the code calling the items moves to a different place in the module tree but the code defining the items does not.
+
+```rust
+mod sound {
+  pub mod instrument {
+    pub fn clarinet() {
+      // Function body code goes here
+    }
+  }
+}
+
+mod performance_group {
+  use crate::sound::instrument;
+
+  pub fn clarinet_trio() {
+    instrument::clarinet();
+    instrument::clarinet();
+    instrument::clarinet();
+  }
+}
+
+fn main() {
+  performance_group::clarinet_trio();
+}
+```
+
+## Idiomatic `use` Paths for Functions vs. Other Items
+
+For functions, it's considered idiomatic to specify function's parent module with `use`. It makes it more clear that the function isn't locally defined while minimizing repetition.
+
+```rust
+mod sound {
+  pub mod instrument {
+    pub fn clarinet() {
+      // Function body code goes here
+    }
+  }
+}
+
+use crate::sound::instrument::clarinet;
+
+fn main() {
+  // NOT IDIOMATIC
+  clarinet();
+  clarinet();
+  clarinet();
+}
+```
+
+For structs, enums and otehr items, it's the opposite, for example the `HashMap` struct:
+
+```rust
+use std::collections::HashMap;
+
+fn main() {
+  let mut map = HashMap::new();
+  map.insert(1, 2);
+}
+```
+
+The only exceptions for this is if the `use` statements would bring two items with the name name into scope, which isn't allowed:
+
+```rust
+use std::fmt;
+use std::io;
+
+fn function1() -> fmt::Result {}
+fn function2() -> io::Result<()> {}
+```
+
+## Renaming Types Brought Into Scope
+
+Refactoring the example above: 
+
+```rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+
+fn function1() -> Result {}
+fn function2() -> IoResult<()> {}
+```
+
+## Re-exporting Names with `pub use`
+
