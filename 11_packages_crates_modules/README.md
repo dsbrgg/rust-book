@@ -290,3 +290,59 @@ fn function2() -> IoResult<()> {}
 
 ## Re-exporting Names with `pub use`
 
+```rust
+mod sound {
+  pub mod instrument {
+    pub fn clarinet() {
+      // Function body code goes here
+    }
+  }
+}
+
+mod performance_group {
+  pub use crate::sound::instrument;
+
+  pub fn clarinet_trio() {
+    instrument::clarinet();
+    instrument::clarinet();
+    instrument::clarinet();
+  }
+}
+
+fn main() {
+  performance_group::clarinet_trio();
+  performance_group::instrument::clarinet();
+}
+```
+
+## Nested Paths
+
+```rust
+// Different use keywords
+use std::cmp::Ordering;
+use std::io;
+
+// Nested
+use std::{cmp::Ordering, io};
+
+// Duplicate paths
+use std::io;
+use std::io::Write;
+
+// DEduplicate paths
+use std::io::{self, Write};
+
+// Brings all public definitions into scope(glob operator)
+use std::collections::*;
+```
+
+## Separating modules into Different Files
+
+Check `src/main.rs` and `src/sound.rs`!
+
+```rust
+mod sound;
+```
+
+By using `mod sound` with a semicolon, we tell Rust to load the contents of the module from another file with the **same name as the module**.
+
