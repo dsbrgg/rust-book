@@ -103,3 +103,22 @@ error[E0502]: cannot borrow `v` as mutable because it is also borrowed as immuta
 This error because of how vectors works: adding a new element onto the end of the vector might require allocating new memory and copying the old elements to the new space, if there isn't room to put all the elements next to each other where the vector currently is. In that case, the reference to the first element would be pointing to deallocated memory. Borrowing rules prevent that.
 
 ## Enum to Store Multiple Types
+
+Rust needs to know what types will be in a vector at compile time so it knows exactly how much memory on the heap will be needed to store each element.
+
+Enums are defined under the same enum type so, when we need to store elements of a different type in a vector, we can define and use an enum.
+
+```rust
+enum SpreadsheetCell {
+  Int(i32),
+  Float(f64),
+  Text(String),
+}
+
+let row = vec![
+  Spreadsheet::Int(3),
+  Spreadsheet::Float(10.12),
+  Spreadsheet::Text(String::from("blue")),
+];
+```
+
