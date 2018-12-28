@@ -12,7 +12,7 @@ For other kinds of collections on the standard library, [check this out](https:/
 
 *Vectors* allow you to store more than one value in a single data structure and puts all the values next to each other in memory. Vectors can only store values of the same type.
 
-Creating a new vector:
+### Creating a new vector:
 
 ```rust
 // new empty vector with associated function new()
@@ -33,7 +33,7 @@ v.push(7);
 v.push(8);
 ```
 
-Reading elements of vectors:
+### Reading elements of vectors:
 
 * Notice how `&` is used to get the reference to a position in the vector
   * If the index is out of bounds, it will `panic`
@@ -52,7 +52,7 @@ match v.get(2) {
 }
 ```
 
-Iterating over vector values:
+### Iterating over vector values:
 
 - To change the value that the mutable reference refers to, we have to dereference it(`*`).
 
@@ -122,3 +122,94 @@ let row = vec![
 ];
 ```
 
+## What is a String?
+
+Strings are implemented as a collection of bytes, plus some methods to provide useful functionality when those bytes are interpreted as text.
+
+Rust has only one string type in the core language, which is the string slice(`str`, usually `&str`). String literals are stored in the binary output of the program and are therefore string slices.
+
+`String` type, which is provided by Rust's standard library rather than coded into the core language, is a growable, mutable, owned, UTF-8 encoded string type.
+
+### Creating a new `String`:
+
+```rust
+let mut s = String::new();
+
+let s = String::from("initial contents");
+```
+
+You can also create a `String` with whichever data type that has the `Display` trait, including string literals.
+
+```rust
+let data = "initial contents";
+
+let s = data.to_string();
+
+// the method also works on a literal directly
+let s = "initial contents".to_string();
+```
+
+Since strings are UTF-8 encoded, we can include any properly encoded data in them:
+
+```rust
+let hello = String::from("السلام عليكم");
+let hello = String::from("Dobrý den");
+let hello = String::from("Hello");
+let hello = String::from("שָׁלוֹם");
+let hello = String::from("नमस्ते");
+let hello = String::from("こんにちは");
+let hello = String::from("안녕하세요");
+let hello = String::from("你好");
+let hello = String::from("Olá");
+let hello = String::from("Здравствуйте");
+let hello = String::from("Hola");
+```
+
+### Updating a `String`:
+
+```rust
+let mut s1 = String::from("foo");
+let s2 = "bar";
+
+// push_str doesn't take ownership
+s.push_str("bar");
+
+// so s2 is still valid here
+println!("s2 is {}", s2);
+
+// push adds a single char
+let mut s = String::from("lo");
+s.push("l");
+```
+
+### Concatenating with `+` or `format!` macro
+
+- The reason for using a reference in the right hand operator using `+`, is because of the method called from this operation(`add`)
+
+```rust
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2; // s1 has been moved here so, it can no longer be used
+```
+
+The `add` method called under the hood has somewhat this type of signature:
+
+```rust
+fn add(self, s: &str) -> String {}
+```
+
+This means that it takes ownership of `self`(first argument, notice no `&`), which means that `self` will be moved here and no longer be valid after that. The second argument will make rust use *deref coercion* to turn the `&String`(from the first example) to a `&String[..]`. This operation looks like a lot of copies are being made but the implementation is more efficient than that.
+
+For more complicated string combining:
+
+```rust
+let s1 = String::from("tic");
+let s2 = String::from("tac");
+let s3 = String::from("toe");
+
+let s = format!("{}-{}-{}", s1, s2, s3);
+```
+
+`format!` will return a `String` with its contents. It also **doesn't** take ownership of its paramenters.
+
+## How Rust stores strings in memory
