@@ -279,6 +279,124 @@ for b in "नमस्ते".bytes() {
 
 You can also get grapheme clusters(closest to the actual chars as we know) from strings, but it's very complex and not available from standard libraries. Use crates.io for this.
 
-## Summary
+### Summary (for strings)
 
 Strings are more complicated than it looks, every programming language makes different choices about how to present this complexity. In Rust, programmers have to put more thought into handling UTF-8 data upfront but it prevents you from having to handle errors involving non-ASCII characters later in your development life cycle.
+
+### Creating Hash Maps
+
+Hash maps are useful when you want to look up data not by using an index, as you can with vectors, but by using a key that can be one of any type. Going through the basic API  for `HashMap<K, V>`:
+
+```rust
+// notice we have to import HashMaps on the standard library
+use std::collections::HashMaps;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 50);
+```
+
+Like vectors, hash maps store their data on the heap. This `HashMap` has the keys of the type `String` and values of type `i32`. Like vectors, they're homogeneous: all the keys must have the same type and all the values must have the same type.
+
+```rust
+use std::collections::HashMap;
+
+let teams = vec![String::from("Blue"), String::from("Yellow")];
+let initial_scores = vec![10, 50];
+
+let scores: HashMap<_, _> = teams.iter().zip(initial_score.iter()).collect();
+```
+
+Here we're using `collect` that uses a vector of tuples, where each tuple consists of a key and its value, which will build the `HashMap`. The `zip` method creates the vector of tuples. The type annotation `HashMap<_, _>` is needed here because it's possible to `collect` into many different data structures and Rust doesn't know which you want unless you specify. For the parameters for the key and value types, however, we use underscores, and Rust can infer the types that the hash map contains based on the types of the data in the vectors.
+
+### Hash Maps Ownership
+
+For types that implement the `Copy` trait, like `i32`, the values are copied into the hash map. For owned values like `String`, the values will be moved and the hash map will be the owner of those values. Inserting references, won't move the values into the hash map, the values that the reference point to must be a valid for at least as long as the hash map is valid.
+
+```rust
+use std::collections::HashMap;
+
+let field_name = String::from("Favorite color");
+let field_value = String::from("Blue");
+
+let mut map = HashMap::new();
+map.insert(field_name, field_value);
+
+// field_name and field_value are not valid here because
+// they were moved into the hashmap
+```
+
+### Accessing Values in a Hash Map
+
+```rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 15);
+
+let team_name = String::from("Blue");
+
+// score returns an Option<&V> (Some(&V))
+// if no value with that key then, None
+let score = score.get(&team_name);
+```
+
+### Iterating through Hash Maps
+
+```rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 50);
+
+for (key, value) in &scores {
+  println!("{} : {}", key, value);
+}
+```
+
+### Updating the Hash Map
+
+```rust
+// overwriting a value
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+let mut team_blue = String::from("Blue");
+let mut team_yellow = String::from("Yellow");
+
+scores.insert(&team_blue, 10);
+scores.insert(&team_blue, 25);
+
+println!("{:#?}", scores);
+
+// only inserting a value if the key has no value
+
+// this will return an Entry enum that represents
+// a value that might or might not exist
+scores.entry(&team_yellow).or_insert(50);
+scores.entry(&team_blue).or_insert(50);
+
+println!("{:#?}", scores);
+
+
+// updating a value based on old value
+
+let text = "hellow wonderful world";
+
+let mut map = HashMap::new();
+
+for word in text.split_whitespace() {
+  // or_insert actually returns a mutable reference (&mut V) to that value for this key
+  // in order to assign to that value, we must dereference count using the asterisk (*)
+  let count = map.entry(word).or_insert(0);
+  *count += 1;
+}
+
+println!("{:#?}", map);
+```
