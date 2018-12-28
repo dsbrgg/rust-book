@@ -212,4 +212,73 @@ let s = format!("{}-{}-{}", s1, s2, s3);
 
 `format!` will return a `String` with its contents. It also **doesn't** take ownership of its paramenters.
 
-## How Rust stores strings in memory
+### How Rust stores strings in memory (Also why no indexing :sad:)
+
+A `String` is a wrapper over a `Vec<u8>`.
+
+```rust
+let len1 = String::from("Holla").len();
+let len2 = String::from("Здравствуйте").len();
+```
+
+The first example is pretty clear. `len` will return 4, which means the vector storing it is 4 bytes long. Each of the letters takes 1 byte when encoded with UTF-8.
+
+The second example might look like it will return a 12 from `len` but Rust's answer is 24. Each Unicode scalar value in that string takes 2 bytes of storage.
+
+Therefore, an index into the string's bytes will not always correlate to a valid unicode scalar value.
+
+```rust
+// invalid code ahead
+let hello = "Здравствуйте";
+let answer = &hello[0];
+```
+
+What should be the `answer`? When encoded in UTF-8, the first byte of `З`(Cyrillic letter Ze) is `208` and the second `151`, so `answer` should be `208` but this is not a valid character on its own.
+
+A final reason Rust doesn’t allow us to index into a String to get a character is that indexing operations are expected to always take constant time (O(1)). But it isn’t possible to guarantee that performance with a String, because Rust would have to walk through the contents from the beginning to the index to determine how many valid characters there were.
+
+Instead of using indexing, it is possible to just get a range from a string with string slices:
+
+```rust
+let hello = "Здравствуйте";
+let s = &hello[0..4];
+```
+
+Following the same example above, you have to be careful though because, the encoding from the above characters takes 2 bytes so, doing `&hello[0..1]` would crash your program since it wouldn't understand the `char` from only that specific byte.
+
+### Iterating over strings
+
+```rust
+for c in "नमस्ते".chars() {
+  println!("{}", c);
+}
+
+// will print
+// न
+// म
+// स
+//् these are diacritics that don't make sense on their own
+// त
+//े these are diacritics that don't make sense on their own
+```
+
+Or iterating over the bytes:
+
+```rust
+for b in "नमस्ते".bytes() {
+  println!("{}", b);
+}
+
+// would print
+// 224
+// 164
+// --snip--
+// 165
+// 135
+```
+
+You can also get grapheme clusters(closest to the actual chars as we know) from strings, but it's very complex and not available from standard libraries. Use crates.io for this.
+
+## Summary
+
+Strings are more complicated than it looks, every programming language makes different choices about how to present this complexity. In Rust, programmers have to put more thought into handling UTF-8 data upfront but it prevents you from having to handle errors involving non-ASCII characters later in your development life cycle.
