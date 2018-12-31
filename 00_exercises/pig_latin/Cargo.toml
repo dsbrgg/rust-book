@@ -1,0 +1,6 @@
+[package]
+name = "pig_latin"
+version = "0.1.0"
+authors = ["opuzzz <dsbrgg@gmail.com>"]
+
+[dependencies]
