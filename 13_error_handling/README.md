@@ -278,3 +278,8 @@ Good note here is that `?` operator is supposed to work only with `Result` enums
 
 ## To `panic!` or not to `panic!`
 
+It’s advisable to have your code panic when it’s possible that your code could end up in a bad state. In this context, a bad state is when some assumption, guarantee, contract, or invariant has been broken, such as when invalid values, contradictory values, or missing values are passed to your code—plus one or more of the following:
+
+- The bad state is not something that’s expected to happen occasionally.
+- Your code after this point needs to rely on not being in this bad state.
+- There’s not a good way to encode this information in the types you use.
