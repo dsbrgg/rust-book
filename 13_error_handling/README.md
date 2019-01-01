@@ -78,3 +78,203 @@ stack backtrace:
 ```
 
 ## Recoverable Errors with `Result` enum
+
+```rust
+enum Result <T, E> {
+  Ok(T),
+  Err(E),
+}
+```
+
+`T`represents the type of the value that will be returned in a success case within the `Ok` variant, and `E` represents the type of the error that will be returned in a failure case within the `Err` variant.
+
+We'll look into an example where we can explore this functionality:
+
+```rust
+use std::fs:File;
+
+fn main() {
+  let f = File::open("hello.txt");
+}
+```
+
+We can know that `File::open` will return a `Result` by peeking into the documentation or asking the compiler: giving a type to a variable that we know is not the return type from the function, will make the compiler let us know that the types don't match.
+
+```
+error[E0308]: mismatched types
+ --> src/main.rs:4:18
+  |
+4 |     let f: u32 = File::open("hello.txt");
+  |                  ^^^^^^^^^^^^^^^^^^^^^^^ expected u32, found enum
+`std::result::Result`
+  |
+  = note: expected type `u32`
+             found type `std::result::Result<std::fs::File, std::io::Error>`
+```
+
+Let's see how the `Result` enum can be handled with a `match` expression:
+
+```rust
+use std::fs:File;
+
+fn main() {
+  let f = File::open("hello.txt"):
+
+  let f = match f {
+    Ok(file) => file,
+    Err(error) => {
+      panic!("There was a problem opening the file {:?}", error)
+    },
+  }
+}
+```
+
+Like the `Option` enum, The `Result` enum is brought to scope in the prelude, so we don't need to specify `Result::` before its variants.
+
+Matching on Different Errors:
+
+```rust
+use std::fs::File;
+use std::io:ErrorKind;
+
+fn main() {
+  let f = File::open("hello.txt");
+
+  let f = match f {
+    Ok(file) => file,
+    Err(error) => match error.kind() {
+      ErrorKind::NotFound => match File::create("hello.txt") {
+        Ok(fc) => fc,
+        Err(e) => panic!("Tried to create file but there was a problem {:?}", e),
+      },
+      other_error => panic!("There was a problem opening the file {:?}", other_error),
+    }
+  }
+}
+```
+
+Matching with different Errors using closures:
+
+```rust
+use std::fs:File;
+use std::io::ErrorKind;
+
+fn main() {
+  let f = File::open("hello.txt").map_err(|error| {
+    if error.kind() == ErrorKind::NotFound {
+      File::create("hello.txt").unwrap_or_else(|error| {
+        panic!("Tried to create file but there was a problem {:?}", error);
+      })
+    } else {
+      panic!("There was a problem opening the file {:?}", error);
+    }
+  })
+}
+```
+
+## Shortcutes for Panic on Error
+
+If the `Result` value is the `Ok` variant, `unwrap` will return the value inside the `Ok`. If the `Result` is the `Err` variant, `unwrap` will call the `panic!` macro.
+
+Other method is `expect` which is similar to `unwrap` but let us also choose the `panic!` error message.
+
+```rust
+use std::fs::File;
+
+fn main() {
+  let f = File::open("hello.txt").unwrap();
+  let f = File::open("hello.txt").expect("Faile to open hello.txt");
+}
+```
+
+Message from `unwrap`:
+
+```
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: Error {
+repr: Os { code: 2, message: "No such file or directory" } }',
+src/libcore/result.rs:906:4
+```
+
+Message from `expect`:
+
+```
+thread 'main' panicked at 'Failed to open hello.txt: Error { repr: Os { code:
+2, message: "No such file or directory" } }', src/libcore/result.rs:906:4
+```
+
+## Propagating errors
+
+Instead of handling error within functions, you can return the error to the calling code so that it can decide what to do, this is known as propagating the error and gives more control to the calling code.
+
+```rust
+use std::io;
+use std::io::Read;
+use std::fs::File;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  let f = File::open("hello.txt");
+
+  let mut f = match f {
+    Ok(file) => file,
+    Err(e) => return Err(e),
+  };
+
+  let mut s = String::new();
+
+  match f.read_to_string(&mut s) {
+    Ok(_) => Ok(s),
+    Err(e) => Err(e),
+  }
+}
+```
+
+## The `?` Operator
+
+The `?` place after a `Result` value is defined to work in almost the same way as the `match` expressions we defined to handle the `Result` values.
+
+Error values taken by `?` go through the `from` function, defined in the `From` trait in the standard library, which is used to convert errors from one type into another. When `?` calls the `from` function, the error type received is converted into the error type defined in the return type of the current function. This is useful when a function returns one error type to represent all the ways a function might fail, even if parts might fail for many different reasons. As long as each error type implements the `from` function to define how to convert itself to the returned error type, `?` takes care of the conversion automatically.
+
+```rust
+use std::io;
+use std::io::Read;
+use std::fs::File;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  let mut f = File::open("hello.txt")?;
+  let mut s = String::new();
+  f.read_to_string(&mut s)?;
+  Ok(s)
+}
+```
+
+You can also chain method calls immediately after the `?` operator:
+
+```rust
+use std::io;
+use std::io::Read;
+use std::fs::File;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  let mut s = String::new();
+
+  File::open("hello.txt")?.read_to_string(&mut s)?;
+
+  Ok(s)
+}
+```
+
+In this specific example there's even a shorter way to do it:
+
+```rust
+use std::io;
+use std::fs;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+  fs::read_to_string("hello.txt")
+}
+```
+
+Good note here is that `?` operator is supposed to work only with `Result` enums.
+
+## To `panic!` or not to `panic!`
+
