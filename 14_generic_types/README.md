@@ -143,3 +143,32 @@ fn main() {
   println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
 }
 ```
+
+## Performance using Generics
+
+Rust implements generics in such a way that your code doesn't run any slower using generic types than it would with concrete types.
+
+Rust uses *monomorphization*: a process of turning generic code into specific code by filling in the concrete types that are used when compiled. There are no runtime cost for using generics.
+
+For example:
+
+```rust
+let integer = Some(5);
+let float = Some(5.0);
+
+// The monomorphized code would like like this
+enum Option_i32 {
+  Some(i32),
+  None,
+}
+
+enum Option_f64 {
+  Some(f64),
+  None,
+}
+
+fn main() {
+  let integer = Option_i32::Some(5);
+  let float = Option_f64::Some(5.0);
+}
+```
