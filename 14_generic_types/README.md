@@ -226,3 +226,51 @@ println!("1 new tweet: {}", tweet.summarize());
 ```
 
 Notice that `Summary` is on the same scope as the structs. If this is supposed to be on a crate and someone else wants to use the functionality, they would have to bring the trait into their scope by specifying `use <name_of_the_crate>::Summary;`. The trait aalse needs to be public for another crate to implement it.
+
+Another restriction to traits is that we can only implement a trai on a type if either the trait or the type is local to our crate. This restriction is parrt of a property of programs called *coherence* and more specifically the *orphan rule*, named because the parent type is not present. The rule ensures that other people's code can't break your code and vice versa. Without the rul, two crates could implement the same trait for the same type and Rust wouldn't know which implementation to use.
+
+## Default Implementations
+
+Following the example above, we could have a default implementation for our `Summary` trait:
+
+```rust
+pub trait Summary {
+  fn summarize_author(&self) -> String;
+
+  // we can also use methods from the trait within itself
+  fn summarize(&self) -> String {
+    String::from("(Read more from {}...)", self.summarize_author())
+  }
+}
+
+// then, we can use it for NewsArticle
+impl Summary for NewsArticle {}
+
+// overriding the trait method
+impl Summary for Tweet {
+  fn summarize_author(&self) -> String {
+    format!("@{}", self.username)
+  }
+}
+
+let article = NewsArticle {
+  headline: String::from("Penguins are ruling the world"),
+  location: String::from("Santos, SP, Brazil"),
+  author: String::from("Chorão"),
+  content: String::from("Penguins are very skate"),
+};
+
+println!("New article available! {}", article.summarize());
+
+let tweet = Tweet {
+  username: String::from("horse_ebooks"),
+  content: String::from("of course, as you probably already know, people"),
+  reply: false,
+  retweet: false,
+};
+
+println!("1 new tweet: {}", tweet.summarize());
+```
+
+## Traits as arguments
+
