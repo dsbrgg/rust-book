@@ -172,3 +172,57 @@ fn main() {
   let float = Option_f64::Some(5.0);
 }
 ```
+
+## Traits: Defining Shared Behaviour
+
+Traits are similar to *interfaces*, with some differences. They tell the Rust compiler about a functionality a particular type has an can share with other types.
+
+Defining traits:
+
+```rust
+pub trait Summary {
+  fn summarize(&self) -> String;
+}
+```
+
+Implementing a trait:
+
+```rust
+pub struct NewsArticle {
+  pub headline: String,
+  pub location: String,
+  pub author: String,
+  pub content: String,
+}
+
+impl Summary for NewsArticle {
+  fn summarize(&self) -> String {
+    format!("{}, by {} ({})", self.headline, self.author, self.location);
+  }
+}
+
+// or ---
+pub struct Tweet {
+  pub username: String,
+  pub content: String,
+  pub reply: bool,
+  pub retweet: bool,
+}
+
+impl Summary for Tweet {
+  fn summarize(&self) -> String {
+    format!("{}: {}", self.username, self.password);
+  }
+}
+
+let tweet = Tweet {
+  username: String::from("horse_ebooks"),
+  content: String::from("of course, as you probably already know, people"),
+  reply: false,
+  retweet: false,
+}
+
+println!("1 new tweet: {}", tweet.summarize());
+```
+
+Notice that `Summary` is on the same scope as the structs. If this is supposed to be on a crate and someone else wants to use the functionality, they would have to bring the trait into their scope by specifying `use <name_of_the_crate>::Summary;`. The trait aalse needs to be public for another crate to implement it.
