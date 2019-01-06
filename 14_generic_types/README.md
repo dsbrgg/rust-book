@@ -274,3 +274,97 @@ println!("1 new tweet: {}", tweet.summarize());
 
 ## Traits as arguments
 
+```rust
+pub fn notify(item: impl Summary) {
+  println!("Breaking news! {}", item.summarize());
+}
+```
+
+## Trait Bounds
+
+`impl Trait` is syntax sugar for a longer form. This is called a *trait bound*:
+
+```rust
+pub fn notify<T: Summary>(item: T) {
+  println!("Breaking news! {}", item.summarize());
+}
+```
+
+Because of the trait bound on `T`, code that calls the function with any other type, like a `String` or an `i32`, won't compile, because those types don't implement `Summary`.
+
+Multiple traits with `+`:
+
+```rust
+pub fn notify(item: impl Summary + Display) {}
+pub fn notify<T: Summary + Display>(item: T) {}
+```
+
+## `where` clauses
+
+Instead of write this:
+
+```rust
+fn some_function<T: Display + Clone, U: Clone + Debug>(t: T, u: U) -> i32 {}
+```
+
+We can use `where` clauses:
+
+```rust
+fn some_function<T, U>(t: T, u: U) -> i32 
+  where T: Display + Debug,
+        U: Clone + Debug
+{
+  // fn body !!
+}
+```
+
+Returning Traits:
+
+```rust
+fn returns_summarizable() -> impl Summary {
+  Tweet {
+    username: String::from("horse_ebooks"),
+    content: String::from("of course, as you probably already know, people"),
+    reply: false,
+    retweet: false,
+  }
+}
+```
+
+## Trait Bounds to conditionally implement methods
+
+```rust
+use std::fmt::Display;
+
+struct Pair<T> {
+  x: T,
+  y: T,
+}
+
+impl<T> Pair<T> {
+  fn new(x: T, y: T) -> Self {
+    Self {
+      x, y
+    }
+  }
+}
+
+impl<T: Display + PartialOrd> Pair<T> {
+  fn cmp_display(&self) {
+    if self.x >= self.y {
+      println!("The largest member is x = {}", self.x);
+    } else {
+      println!("The largest member is y = {}", self.y);
+    }
+  }
+}
+
+// implement a trait for any type that implements another trait
+impl<T: Display> ToString for T {
+  // --snip--
+}
+```
+
+In dynamically typed languages, we would get an error at runtime if we called a method on a type that the type didn’t implement. But Rust moves these errors to compile time so we’re forced to fix the problems before our code is even able to run. Additionally, we don’t have to write code that checks for behavior at runtime because we’ve already checked at compile time. Doing so improves performance without having to give up the flexibility of generics.
+
+## Lifetimes
