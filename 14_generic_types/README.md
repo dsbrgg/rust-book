@@ -368,3 +368,144 @@ impl<T: Display> ToString for T {
 In dynamically typed languages, we would get an error at runtime if we called a method on a type that the type didn’t implement. But Rust moves these errors to compile time so we’re forced to fix the problems before our code is even able to run. Additionally, we don’t have to write code that checks for behavior at runtime because we’ve already checked at compile time. Doing so improves performance without having to give up the flexibility of generics.
 
 ## Lifetimes
+
+Every reference has a *lifetime*, which is the scope for which that reference is valid. Most of the time, lifetimes are implicit and inferred, just like most of the time, types are inferred. We must annotate lifetimes when the lifetimes of references could be related in a few different ways.
+
+The Rust compiler has a *borrow checker* that compares scopes to determine wether all borrows are valid.
+
+Invalid borrow: 
+
+```rust
+{
+  let r;                // ---------+-- 'a
+                        //          |
+  {                     //          |
+      let x = 5;        // -+-- 'b  |
+      r = &x;           //  |       |
+  }                     // -+       |
+                        //          |
+  println!("r: {}", r); //          |
+}                       // ---------+
+```
+
+Valid borrow:
+
+```rust
+{
+  let x = 5;            // ----------+-- 'b
+                        //           |
+  let r = &x;           // --+-- 'a  |
+                        //   |       |
+  println!("r: {}", r); //   |       |
+                        // --+       |
+}      
+```
+
+## Generic Lifetimes in Functions
+
+```rust
+fn main() {
+  let string1 = String::from("abcd");
+  let string2 = "xyz";
+
+  let result = longest(string1.as_str(), string2);
+  println!("The longest string is {}", result);
+}
+
+fn longest(x: &str, y: &str) -> &str {
+  if x.len() > y.len() {
+      x
+  } else {
+      y
+  }
+}
+```
+
+Note that the function take string slices, which are *references*, like that we can accept both slices of a `String` and string literals.
+
+`longest` will throw an error though:
+
+```
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:1:33
+  |
+1 | fn longest(x: &str, y: &str) -> &str {
+  |                                 ^ expected lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but the
+signature does not say whether it is borrowed from `x` or `y`
+```
+
+We don't know the concrete lifetimes of the references that will be passed in, so we can't look at the scope as we did in the other example from before. We'll have to annotate it.
+
+```rust
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime
+```
+
+On the `longest` function:
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+  if x.len() > y.len() {
+      x
+  } else {
+      y
+  }
+}
+```
+
+The constraint we're expressing here is that all the references in the parameters and the return value must have the same lifetime, naming it `'a`.
+
+We're **not** changing the lifetimes of any values passed in or returned, rather we're specifying that the borrow checker should reject any values that don't adhere to these constraints.
+
+When a function has references to or from code outside that function, it becomes almost impossible for Rust to figure out the lifetiems of the parameters or return values on its own. The lifetimes might be different each time the function is called.
+
+In the `longest` example, the concrete lifetime that is substituted for `'a` is the part of the scope of `x` that overlaps with the scope of `y`. In other words, the generic lifetime `'a` will get the *concrete lifetime* that is equal to the smaller of the lifetimes of `x` and `y`.
+
+Valid Example:
+
+```rust
+fn main() {
+  let string1 = String::from("long string is long");
+
+  {
+    let string2 = String::from("xyz");
+    let result = longest(string1.as_str(), string2.as_str());
+    println!("The longest string is {}", result);
+  }
+}
+```
+
+Invalid Example:
+
+```rust
+fn main() {
+  let string1 = String::from("long string is long");
+  let result;
+  {
+    let string2 = String::from("xyz");
+    result = longest(string1.as_str(), string2.as_str());
+  }
+  println!("The longest string is {}", result);
+}
+```
+
+The error: 
+
+```
+error[E0597]: `string2` does not live long enough
+  --> src/main.rs:15:5
+   |
+14 |         result = longest(string1.as_str(), string2.as_str());
+   |                                            ------- borrow occurs here
+15 |     }
+   |     ^ `string2` dropped here while still borrowed
+16 |     println!("The longest string is {}", result);
+17 | }
+   | - borrowed value needs to live until here
+```
+
+As humans, we can look at this code and see that `string1`  is longer than `string2` and therefore `result` will contain the `string1` reference. However, the compile can't see that the reference is valid in this case. We’ve told Rust that the lifetime of the reference returned by the longest function is the same as the smaller of the lifetimes of the references passed in. 
+
