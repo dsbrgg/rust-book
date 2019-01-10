@@ -3,14 +3,29 @@ fn main() {
 }
 
 fn rolldice_sum_prob(sum:i32, dice_amount:i32) -> f64 {
-  let mut matrix: Vec<Vec<_>> = Vec::new();
+  let mut matrix: Vec<_> = Vec::new();
+  let all_comb = 6u32.pow(dice_amount as u32);
 
-  for d in 0..dice_amount {
+  println!("all possible combinations -> {:#?}", all_comb);
+
+  for v in 1..=6 {
     matrix.push(Vec::new());
-    for p in 1..=6 {
-      matrix[d as usize].push(p);
+
+    let index: usize = v - 1;
+    for d in 1..dice_amount {
+      (1..=6).for_each(|x| {
+          let dv = x - 1;
+
+          if matrix[index].len() == 6 {
+            matrix[index][dv] += x;
+          } else {
+            matrix[index].push(v+x);
+          }
+      })
     }
   }
+
+
 
   println!("{:#?}", matrix);
 
