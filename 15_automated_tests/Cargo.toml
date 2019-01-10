@@ -1,5 +1,5 @@
 [package]
-name = "tests"
+name = "adder"
 version = "0.1.0"
 authors = ["opuzzz <dsbrgg@gmail.com>"]
 

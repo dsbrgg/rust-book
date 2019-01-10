@@ -53,3 +53,54 @@ cargo test add
 cargo test -- --ignored
 ```
 
+## Rust tests organization
+
+The Rust community thinks about tests in terms of two main categories: unit tests and integration tests. Unit tests are small and more focused, testing one module in isolation at a time, and can test private interfaces. Integration tests are entirely external to your library and use your code in the same way any other external code would, using only the public interface and potentially exercising multiple modules per test.
+
+### Unit Tests
+
+The purpose of unit tests is to test each unit of code in isolation from the rest of the code to quickly pinpoint where code is and isn’t working as expected. You’ll put unit tests in the src directory in each file with the code that they’re testing. The convention is to create a module named tests in each file to contain the test functions and to annotate the module with cfg(test).
+
+### The tests modules and `#[cfg(test)]`
+
+`#[cfg(test)]` annotation tells Rust to compile and run the test code only when you can `cargo test`, not with `cargo build`. Since unit tests go in the same files as the code, you'll use `#[cfg(test)]` to specify that they shouldn't be included in the compiled result.
+
+The attribute `cfg` stands for *configuration* and tells Rust that the following item should only be included given a certain configuration option.
+
+### Testing Private Functions
+
+```rust
+pub fn add_two(a: i32) -> i32 {
+  internal_adder(a, 2)
+}
+
+fn internal_adder(a: i32, b: i32) -> i32 {
+  a + b
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn internal() {
+    assert_eq!(4, internal_adder(2, 2));
+  }
+}
+```
+
+Note that the `internal_adder` function is not marked as pub, but because tests are just Rust code and the `tests` module is just another module, you can bring `internal_adder` into a test’s scope and call it. If you don’t think private functions should be tested, there’s nothing in Rust that will compel you to do so.
+
+### Integration Tests
+
+In Rust, integration tests are entirely external to your library. They use your library in the same way any other code would, which means they can only call functions that are part of your library’s public API. Their purpose is to test whether many parts of your library work together correctly. Units of code that work correctly on their own could have problems when integrated, so test coverage of the integrated code is important as well. To create integration tests, you first need a tests directory.
+
+### *tests* directory
+
+Make a *tests* directory at the top level of the project, next to *src*. Cargo knows to look for integration test files in this directory.
+
+You can still run independent tests within the tests folder:
+
+```
+cargo test --test <function_name>
+```
