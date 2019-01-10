@@ -104,3 +104,9 @@ You can still run independent tests within the tests folder:
 ```
 cargo test --test <function_name>
 ```
+
+Another convention is to separate tests within the tests folder with a `tests/common` folder. Inserting the files inside this *common* folder will let Rust know not to test that module was an integration test.
+
+### Integration tests for binary crates
+
+Only library crates(`lib.rs`) expose functions that other crates can use; binary crates(`main.rs`) are meant to be run on their own.
