@@ -35,3 +35,21 @@ cargo test -- --nocapture
 
 ## Running tests by name
 
+```
+cargo test <function_name>
+```
+
+## Running multiple tests by name
+
+```
+// suppose you have two tests with the names: add_two and add_four
+// following command will run both
+cargo test add
+```
+
+## Running ignored tests
+
+```
+cargo test -- --ignored
+```
+

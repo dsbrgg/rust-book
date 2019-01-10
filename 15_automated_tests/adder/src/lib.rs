@@ -39,6 +39,25 @@ mod tests {
   }
 
   #[test]
+  fn it_works_again() -> Result<(), String> {
+    if 2 + 2 == 4 {
+      Ok(())
+    } else {
+      Err(String::from("two plus two does not equal four"))
+    }
+  }
+
+  #[test]
+  #[ignore]
+  fn it_works_again_as_well() -> Result<(), String> {
+    if 2 + 2 == 4 {
+      Ok(())
+    } else {
+      Err(String::from("two plus two does not equal four"))
+    }
+  }
+
+  #[test]
   fn larger_can_hold_smaller() {
     let larger = Rectangle { length: 8, width: 7 };
     let smaller = Rectangle { length: 5, width: 1 };
