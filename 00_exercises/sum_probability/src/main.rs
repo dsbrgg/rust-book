@@ -1,5 +1,6 @@
 fn main() {
   rolldice_sum_prob(11, 2);
+  rolldice_sum_prob(8, 3);
 }
 
 fn rolldice_sum_prob(sum:i32, dice_amount:i32) -> f64 {
@@ -12,10 +13,9 @@ fn rolldice_sum_prob(sum:i32, dice_amount:i32) -> f64 {
     matrix.push(Vec::new());
 
     let index: usize = v - 1;
-    for d in 1..dice_amount {
+    for _d in 1..dice_amount {
       (1..=6).for_each(|x| {
           let dv = x - 1;
-
           if matrix[index].len() == 6 {
             matrix[index][dv] += x;
           } else {
@@ -25,9 +25,25 @@ fn rolldice_sum_prob(sum:i32, dice_amount:i32) -> f64 {
     }
   }
 
+  let flatten = matrix.into_iter().flatten().collect::<Vec<usize>>();
+  println!("flatten -> {:#?}", flatten);
+  let filter = flatten.into_iter().filter(|&x| x == sum as usize).collect::<Vec<usize>>();
 
+  println!("filter -> {:#?}", filter);
 
-  println!("{:#?}", matrix);
+  // :(
+  // let total_times = matrix
+  //   .into_iter()
+  //   .flatten()
+  //   .collect::<Vec<usize>>()
+  //   .into_iter()
+  //   .filter(|&x| x == sum as usize)
+  //   .collect::<Vec<usize>>()
+  //   .len() as u32;
+
+  // println!("total_times -> {:#?}", total_times);
+
+  // (total_times / all_comb) as f64
 
   0.1
 }
