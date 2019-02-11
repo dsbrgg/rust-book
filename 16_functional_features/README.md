@@ -66,3 +66,47 @@ let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
 assert_eq!(v2, vec![2, 3, 4]);
 ```
 
+### Using `Iterator` Trait
+
+You can also create iterators that do anything you want by implementing the Iterator trait on your own types, the only method you’re required to provide a definition for is the next method. Once you’ve done that, you can use all other methods that have default implementations provided by the Iterator trait!
+
+As en example, an `Iterator` that will ever only count until 5:
+
+```rust
+struct Counter {
+  counter: u32,
+}
+
+impl Counter {
+  fn new() -> Counter {
+    Counter { count: 0 }
+  }
+}
+
+impl Iterator for Counter {
+  // associated types are seen in chapter 19
+  type Item = u32;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    self.count += 1;
+
+    if self.count < 6 {
+      Some(self.count)
+    } else {
+      None
+    }
+  }
+}
+
+#[test]
+fn calling_next_directly() {
+  let mut counter = Counter::new();
+
+  assert_eq!(counter.next(), Some(1));
+  assert_eq!(counter.next(), Some(2));
+  assert_eq!(counter.next(), Some(3));
+  assert_eq!(counter.next(), Some(4));
+  assert_eq!(counter.next(), Some(5));
+  assert_eq!(counter.next(), None);
+}
+```
