@@ -157,3 +157,36 @@ fn main() {
   assert_eq!(5, *y);
 }
 ```
+
+## Deref Coercion
+
+*Deref coercion* makes it easy to pass arguments to function and methods and get it's actual value by automatically dereferencing(in case the type has `Deref` implemented).  It happens automatically when we pass a reference to a particular type's value as an argument to a function or method that doesn't match the parameter type in the function or method definition.
+
+Example:
+
+```rust
+fn hello(name: &str) {
+  println!("Hello, {}!", name);
+}
+
+fn main() {
+  let m = MyBox::new(String::from("Rust"));
+  // this will deref coerce until it gets to the MyBox deref method
+  // which would return the actual value as a reference (&String)
+  // which would eventually call the deref from String
+  // since a String is a smart pointer as well
+  hello(&m);
+}
+```
+
+## Deref Coercion and Mutability
+
+You can use `Deref` trait to override the `*` operator on **immutable references**, you can use `DerefMut` instead for **mutable references**.
+
+Rust does deref coercion when it finds types and trait implementations in three cases:
+
+- From `&T` to `&U` when `T: Deref<Target=U>`
+- From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
+- From `&mut T` to `&U` when `T: Deref<Target=U>``
+
+The third case is trickier: Rust will also coerce a mutable reference to an immutable one. But the reverse is not possible: immutable references will never coerce to mutable references. Because of the borrowing rules, if you have a mutable reference, that mutable reference must be the only reference to that data (otherwise, the program wouldn’t compile). Converting one mutable reference to one immutable reference will never break the borrowing rules. Converting an immutable reference to a mutable reference would require that there is only one immutable reference to that data, and the borrowing rules don’t guarantee that. Therefore, Rust can’t make the assumption that converting an immutable reference to a mutable reference is possible.
