@@ -82,3 +82,78 @@ fn main() {
 Boxes provides only the indirection and heap allocation, no other special capabilities. They also don't have any performance overhead that these special capabilities incur.
 
 `Box<T>` is a smart pointer that implements the `Deref` trait which allows its values to be treated like references. When it goes out of scpe, the heap data that the box is pointing to is cleand up as well because of the `Drop` trait implementation.
+
+## `Deref` Trait
+
+`Deref`trait allows you to customize the behaviour of the *dereference operator* (`*`). By using it, you can make a smart pointer be treated liek a regular reference, you can write code that operates on references and use that code with smart pointers too.
+
+```rust
+fn main() {
+  let x = 5;
+  let y = &x;
+
+  assert_eq!(5, x);
+  // to make this assertion possible
+  // since "y" is a reference (an address to the actual value) to x
+  // we have to use "*y" to follow the reference to the value
+  // it's pointing to (hence dereference)
+  assert_eq!(5, *y);
+
+  // you can also do this same example with a Box
+
+  let w = 6;
+  let z = Box::new(x);
+
+  assert_eq!(6, w);
+  // since box just allocates data in the heap
+  // it works much like a reference
+  // it's a smart pointer with the Deref trait
+  assert_eq!(6, *z);
+}
+```
+
+## Defining a Smart Pointer with `Deref` Trait
+
+The `Box<T>` type is ultimately defined as a *tuple struct* with one element.
+
+```rust
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+  fn new(x: T) -> MyBox<T> {
+    MyBox(x)
+  }
+}
+```
+
+For now `MyBox<T>` cannot be dereferenced since it's just a simple tuple struct. In order for us to have the same behaviour as the `Box<T>`, we still have to implement `Deref`.
+
+```rust
+use std::ops::Deref;
+
+impl<T> Deref for MyBox<T> {
+  // associated types are a slightly different way
+  // to declare a generic parameter
+  type Target = T;
+
+  // with this, when trying to access the value from MyBox
+  // it will actually return a reference to the value we
+  // want to access with the * operator
+  fn deref(&self) -> &T {
+    &self.0
+  }
+}
+```
+
+Now, making the same assertion as before but with our `MyBox<T>` compiles!
+
+```rust
+fn main() {
+  let x = 5;
+  let y = MyBox::new(x);
+
+  assert_eq!(5, x);
+  // behind the scenes, Rust is calling: *(y.deref())
+  assert_eq!(5, *y);
+}
+```
