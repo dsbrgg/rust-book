@@ -228,7 +228,35 @@ fn main() {
   println!("CustomSmartPointer created.");
 
   drop(c);
-  
+
   println!("CustomSmartPointer dropped before the end of main.");
 }
 ```
+
+## `Rc<T>`, Reference Counted Smart Pointer
+
+Ownership is clear: you know exactly which variable owns a given value. However, there are cases when a single value might have multiple owners. For example, in graph data structures, multiple edges might point to the same node and the node is conceptually owned by all of the edges that point to it. A node shouldn't be cleaned up unless it doesn't have any edges pointing to it.
+
+`Rc<T>` which is an abbreviation for *reference counting* enables multiple ownership. It keeps track of the number of references to a value which determines or not a value is still in use.
+
+> Analogy: Imagine `Rc<T>` as a TV in a family room. When one person enters to watch TV, they turn it on. Others can come into the room and watch the TV. When the last person leaves the room, they turn off the TV because it’s no longer being used. If someone turns off the TV while others are still watching it, there would be uproar from the remaining TV watchers!
+
+Let's reimplement our *cons list* example with `Rc<T>`
+
+```rust
+enum List {
+  Cons(i32, Rc<List>),
+  Nil,
+}
+
+use List::{Cons,Nil};
+use std::rc::Rc;
+
+fn main() {
+  let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+  let b = Cons(3, Rc::clone(&a));
+  let c = Cons(4, Rc::clone(&a));
+}
+```
+
+The implementation of `Rc::clone` doesn’t make a deep copy of all the data like most types’ implementations of clone do. The call to `Rc::clone` only increments the reference count, which doesn’t take much time. Deep copies of data can take a lot of time. By using `Rc::clone` for reference counting, we can visually distinguish between the deep-copy kinds of clones and the kinds of clones that increase the reference count. When looking for performance problems in the code, we only need to consider the deep-copy clones and can disregard calls to `Rc::clone`.
