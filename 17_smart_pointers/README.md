@@ -187,6 +187,48 @@ Rust does deref coercion when it finds types and trait implementations in three 
 
 - From `&T` to `&U` when `T: Deref<Target=U>`
 - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
-- From `&mut T` to `&U` when `T: Deref<Target=U>``
+- From `&mut T` to `&U` when `T: Deref<Target=U>`
 
 The third case is trickier: Rust will also coerce a mutable reference to an immutable one. But the reverse is not possible: immutable references will never coerce to mutable references. Because of the borrowing rules, if you have a mutable reference, that mutable reference must be the only reference to that data (otherwise, the program wouldn’t compile). Converting one mutable reference to one immutable reference will never break the borrowing rules. Converting an immutable reference to a mutable reference would require that there is only one immutable reference to that data, and the borrowing rules don’t guarantee that. Therefore, Rust can’t make the assumption that converting an immutable reference to a mutable reference is possible.
+
+## `Drop` Trait
+
+The `Drop` trait let you specify what happens when a value is about to go out of scope. In some langauges, the programmer must call code to free memory or resources every time they finish using and instance of a smart pointer. If they forget, the system might become overloaded and crash. In Rust, you can specify that a particular bit of code be run whenever a value goes out of scope, and the compiler will insert this code automatically. As a result, you don’t need to be careful about placing cleanup code everywhere in a program that an instance of a particular type is finished with—you still won’t leak resources!
+
+The `Drop` trait requires you to implement one method named `drop` that takes a mutable reference to `self`.
+
+```rust
+struct CustomSmartPointer {
+  data: String,
+}
+
+impl Drop for CustomSmartPointer {
+  fn drop(&mut self) {
+    println!("Dropping CustomSmartPointer with data: {}", self.data);
+  }
+}
+
+fn main() {
+  let c = CustomSmartPointer { data: String::from("my stuff") };
+  let d = CustomSmartPointer { data: String::from("other stuff") };
+  println!("CustomSmartPointers created");
+}
+```
+
+## Dropping with `std::mem::drop`
+
+Rust won't let you call the `Drop` trait's `drop` method manually; instead you have to call the `std::mem::drop` function provided by the standard library if you want to force a value to be dropped before the end of its scope.
+
+Rust doesn't let us call `drop` explicitly because Rust would still automatically call `drop` on the value at the end of `main`. This would be a *double free* error because Rust would be trying to clean up the same value twice.
+
+```rust
+fn main() {
+  let c = CustomSmartPointer { data: String::from("some data") };
+
+  println!("CustomSmartPointer created.");
+
+  drop(c);
+  
+  println!("CustomSmartPointer dropped before the end of main.");
+}
+```
