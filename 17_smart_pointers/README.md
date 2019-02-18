@@ -260,3 +260,9 @@ fn main() {
 ```
 
 The implementation of `Rc::clone` doesn’t make a deep copy of all the data like most types’ implementations of clone do. The call to `Rc::clone` only increments the reference count, which doesn’t take much time. Deep copies of data can take a lot of time. By using `Rc::clone` for reference counting, we can visually distinguish between the deep-copy kinds of clones and the kinds of clones that increase the reference count. When looking for performance problems in the code, we only need to consider the deep-copy clones and can disregard calls to `Rc::clone`.
+
+## `RefCell<T>` and Interior Mutability Pattern
+
+*Interior mutability* is a design pattern in Rust that allows you to mutate data even when tehre are immutable references to that data; normally this action is not allowed by the *borrowing rules*. The pattern uses `unsafe` code inside a data structure to bend Rust's usual rules that govern mutation and borrowing. We can use types that use the interior mutability pattern when we can ensure that the borrowing rules will be followed at runtime, even though the compiler can't guarantee that. The `unsafe` code involved is then wrapped in a safe API, and the outer type is still immutable.
+
+With references and `Box<T>`, the borrowing rules invariants are enforced at compile time. With `RefCell<T>`, these invariants are enforced *at runtime*. With references, if you break these rules, you'll get a compiler error. With `RefCell<T>`, if you break these rules, your program will panic and exit.
