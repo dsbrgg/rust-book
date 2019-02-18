@@ -266,3 +266,9 @@ The implementation of `Rc::clone` doesn’t make a deep copy of all the data lik
 *Interior mutability* is a design pattern in Rust that allows you to mutate data even when tehre are immutable references to that data; normally this action is not allowed by the *borrowing rules*. The pattern uses `unsafe` code inside a data structure to bend Rust's usual rules that govern mutation and borrowing. We can use types that use the interior mutability pattern when we can ensure that the borrowing rules will be followed at runtime, even though the compiler can't guarantee that. The `unsafe` code involved is then wrapped in a safe API, and the outer type is still immutable.
 
 With references and `Box<T>`, the borrowing rules invariants are enforced at compile time. With `RefCell<T>`, these invariants are enforced *at runtime*. With references, if you break these rules, you'll get a compiler error. With `RefCell<T>`, if you break these rules, your program will panic and exit.
+
+Checking borrowing rules at compile time will make errors be caught sooner in the development process, and there is no impact in runtime performance, this is Rust's default. 
+
+Checking the borrowing rules at runtime can make certain memory-safe scenarios allowed whereas they wouldn't be because of the compile-time checks.
+
+Static analisys, like the Rust compiler, is inherently conservative. Some properties of code are impossible to detect by analyzing the code.
