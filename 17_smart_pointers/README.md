@@ -272,3 +272,11 @@ Checking borrowing rules at compile time will make errors be caught sooner in th
 Checking the borrowing rules at runtime can make certain memory-safe scenarios allowed whereas they wouldn't be because of the compile-time checks.
 
 Static analisys, like the Rust compiler, is inherently conservative. Some properties of code are impossible to detect by analyzing the code.
+
+The `RefCell<T>` type is useful when you're sure your code follows the borrowing rules but the compiler is unable to understand and guarantee that.
+
+### RECAP FOR SMART POINTERS
+
+- `Rc<T>` enables multiple owners of the same data; `Box<T>` and `RefCell<T>` have a single owner.
+- `Box<T>` allows immutable or mutable borrows checked at compile time; `Rc<T>` allows only immutable borrows checked at compile time; `RefCell<T>` allows immutable or mutable borrows checked at runtime.
+- Because `RefCell<T>` allows mutable borrows checked at runtime, you can mutate the value inside the `RefCell<T>` even when the `RefCell<T>` is immutable.
