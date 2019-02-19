@@ -280,3 +280,13 @@ The `RefCell<T>` type is useful when you're sure your code follows the borrowing
 - `Rc<T>` enables multiple owners of the same data; `Box<T>` and `RefCell<T>` have a single owner.
 - `Box<T>` allows immutable or mutable borrows checked at compile time; `Rc<T>` allows only immutable borrows checked at compile time; `RefCell<T>` allows immutable or mutable borrows checked at runtime.
 - Because `RefCell<T>` allows mutable borrows checked at runtime, you can mutate the value inside the `RefCell<T>` even when the `RefCell<T>` is immutable.
+
+```rust
+fn main() {
+  // won't compile !!!
+  let x = 5;
+  let y = &mut x;
+}
+```
+
+The code above wouldn't compile but there are situations in which it would be useful for a value to mutate itself in tis methods but appear immutable to other code. Code outside the value's methods would not be able to mutate the value. Using `RefCell<T>` is one way to get the ability to have interior mutability. It won't get around the borrowin rules completely, though... The borrow checker in the compiler allows this interior mutability and the borrowing rules are checked at runtime instead. If you violate the rules, you'll get `panic!` instead of a compiler error.
