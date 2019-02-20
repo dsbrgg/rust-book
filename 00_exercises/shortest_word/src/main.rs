@@ -22,6 +22,7 @@ fn second(s: &str) -> u32 {
    .unwrap_or(0) as u32
 }
 
+// --------------------------------------------------
 fn returns_expected() {
   assert_eq!(find_short("bitcoin take over the world maybe who knows perhaps"), 3);
   assert_eq!(find_short("turns out random test cases are easier than writing out basic ones"), 3);
