@@ -352,6 +352,7 @@ mod tests {
 
   impl Messenger for MockMessenger {
     fn send(&self, message: &str) {
+      // borrow_mut returns a RefMut<T> smart pointer which implement Deref
       self.sent_messages.borrow_mut().push(String::from(message));
     }
   }
@@ -363,6 +364,7 @@ mod tests {
 
     limit_tracker.set_value(80);
 
+    // borrow returns a Ref<T> smart pointer which implement Deref
     assert_eq!(mock_messenger.sent_messages.borrow().len(), 1);
   }
 }
@@ -373,3 +375,40 @@ The `sent_messages` field is now of type `RefCell<Vec<String>>` instead of `Vec<
 For the implementation of the send method, the first parameter is still an immutable borrow of `self`, which matches the trait definition. We call `borrow_mut` on the `RefCell<Vec<String>>` in `self.sent_messages` to get a mutable reference to the value inside the `RefCell<Vec<String>>`, which is the vector. Then we can call push on the mutable reference to the vector to keep track of the messages sent during the test.
 
 The last change we have to make is in the assertion: to see how many items are in the inner vector, we call borrow on the `RefCell<Vec<String>>` to get an immutable reference to the vector.
+
+`RefCell<T>` lets us have many immutable borrows or one mutable borrow at any point in time.
+
+Catching borrowing errors at runtime rather than compile time means that you would find a mistake in your code later in the development process and possibly not until your code was deployed to production. Also, your code would incur a small runtime performance penalty as a result of keeping track of the borrows at runtime rather than compile time.  You can use `RefCell<T>` despite its trade-offs to get more functionality than regular references provide.
+
+## Having multiple owners and mutable data
+
+With `Rc<T>` and `RefCell<T>`, you can get a value that can have multiple owners *and* that you can mutate!
+
+```rust
+#[derive(Debug)]
+enum List {
+  Cons(Rc<RefCell<i32>>, Rc<List>),
+  Nil,
+}
+
+use List::{Cons, Nil};
+use std::rc::Rc;
+use std::cell::RefCell;
+
+fn main() {
+  let value = Rc::new(RefCell::new(5));
+
+  let a = Rc::new(Cons(Rc::clone(&value), Rc::new(Nil)));
+
+  let b = Cons(Rc::new(RefCell::new(6)), Rc::clone(&a));
+  let c = Cons(Rc::new(RefCell::new(10)), Rc::clone(&a));
+
+  *value.borrow_mut() += 10;
+
+  println!("a after = {:?}", a);
+  println!("b after = {:?}", b);
+  println!("c after = {:?}", c);
+}
+```
+
+By using `RefCell<T>`, we have an outwardly immutable `List` value. But we can use the methods on `RefCell<T>` that provide access to its interior mutability so we can modify our data when we need to. The runtime checks of the borrowing rules protect us from data races, and it’s sometimes worth trading a bit of speed for this flexibility in our data structures.
