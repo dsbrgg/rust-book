@@ -412,3 +412,61 @@ fn main() {
 ```
 
 By using `RefCell<T>`, we have an outwardly immutable `List` value. But we can use the methods on `RefCell<T>` that provide access to its interior mutability so we can modify our data when we need to. The runtime checks of the borrowing rules protect us from data races, and it’s sometimes worth trading a bit of speed for this flexibility in our data structures.
+
+## Reference Cycles and Leaking Memory
+
+Rust’s memory safety guarantees make it difficult, but not impossible, to accidentally create memory that is never cleaned up (known as a *memory leak*). Preventing memory leaks entirely is not one of Rust’s guarantees in the same way that disallowing data races at compile time is, meaning memory leaks are memory safe in Rust. It’s possible to create references where items refer to each other in a cycle. This creates memory leaks because the reference count of each item in the cycle will never reach 0, and the values will never be dropped.
+
+```rust
+
+use std::rc::Rc;
+use std::cell::RefCell;
+use List::{Cons, Nil};
+
+#[derive(Debug)]
+enum List {
+  Cons(i32, RefCell<Rc<List>>),
+  Nil,
+}
+
+impl List {
+  fn tail(&self) -> Option<&RefCell<Rc<List>>> {
+    match self {
+      Cons(_, item) => Some(item),
+      Nil => None,
+    }
+  }
+}
+fn main() {
+  let a = Rc::new(Cons(5, RefCell::new(Rc::new(Nil))));
+
+  println!("a initial rc count = {}", Rc::strong_count(&a));
+  println!("a next item = {:?}", a.tail());
+
+  let b = Rc::new(Cons(10, RefCell::new(Rc::clone(&a))));
+
+  println!("a rc count after b creation = {}", Rc::strong_count(&a));
+  println!("b initial rc count = {}", Rc::strong_count(&b));
+  println!("b next item = {:?}", b.tail());
+
+  if let Some(link) = a.tail() {
+    *link.borrow_mut() = Rc::clone(&b);
+  }
+
+  println!("b rc count after changing a = {}", Rc::strong_count(&b));
+  println!("a rc count after changing a = {}", Rc::strong_count(&a));
+
+  // Uncomment the next line to see that we have a cycle;
+  // it will overflow the stack
+  // println!("a next item = {:?}", a.tail());
+}
+```
+
+The reference count of the `Rc<List>` instances in both a and b are 2 after we change the list in `a` to point to `b`. At the end of main, Rust will try to drop `b` first, which will decrease the count in each of the `Rc<List>` instances in `a` and `b` by 1.
+
+However, because a is still referencing the `Rc<List>` that was in `b`, that `Rc<List>` has a count of 1 rather than 0, so the memory the `Rc<List>` has on the heap won’t be dropped. The memory will just sit there with a count of 1, forever.
+
+If a more complex program allocated lots of memory in a cycle and held onto it for a long time, the program would use more memory than it needed and might overwhelm the system, causing it to run out of available memory.
+
+Another solution for avoiding reference cycles is reorganizing your data structures so that some references express ownership and some references don’t. As a result, you can have cycles made up of some ownership relationships and some non-ownership relationships, and only the ownership relationships affect whether or not a value can be dropped.
+
