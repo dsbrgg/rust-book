@@ -1,21 +1,28 @@
 fn main() {
-    highlight("FFFR345F2LL");
+  highlight("FFFR345F2LL");
 }
 
 pub fn highlight(code: &str) -> String {
-  // Implement your syntax highlighter here
-  let mut highlighted = Vec::new();
-  let mut current_char = '';
+  let mut highlighted = String::new();
   let mut chars = code.chars();
 
-  while chars.next() != None {
-    match chars.next().unwrap() {
-      'F' => highlighted.push(r#"<span style="color: pink">F</span>"#),
-      'L' => highlighted.push(r#"<span style="color: red">L</span>"#),
-      'R' => highlighted.push(r#"<span style="color: green">R</span>"#),
-      '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => highlighted.push(r#"<span style="color: orange">1</span>"#),
+  loop {
+    match chars.next() {
+      Some('(') => highlighted.push_str("("),
+      Some(')') => highlighted.push_str(")"),
+      Some('F') => highlighted.push_str(r#"<span style="color: pink">F</span>"#),
+      Some('L') => highlighted.push_str(r#"<span style="color: red">L</span>"#),
+      Some('R') => highlighted.push_str(r#"<span style="color: green">R</span>"#),
+      Some(number) => highlighted.push_str(
+        &format!(r#"<span style="color: orange">{}</span>"#, number)
+      ),
+      None => break
     }
   }
+
+  println!("{:?}", highlighted);
+
+  highlighted
 }
 
 // r#(raw string) negates the need to escape special carachaters
