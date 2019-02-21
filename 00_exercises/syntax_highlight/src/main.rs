@@ -4,7 +4,18 @@ fn main() {
 
 pub fn highlight(code: &str) -> String {
   // Implement your syntax highlighter here
-  code.to_string()
+  let mut highlighted = Vec::new();
+  let mut current_char = '';
+  let mut chars = code.chars();
+
+  while chars.next() != None {
+    match chars.next().unwrap() {
+      'F' => highlighted.push(r#"<span style="color: pink">F</span>"#),
+      'L' => highlighted.push(r#"<span style="color: red">L</span>"#),
+      'R' => highlighted.push(r#"<span style="color: green">R</span>"#),
+      '0'|'1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => highlighted.push(r#"<span style="color: orange">1</span>"#),
+    }
+  }
 }
 
 // r#(raw string) negates the need to escape special carachaters
