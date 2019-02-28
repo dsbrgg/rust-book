@@ -3,19 +3,61 @@ fn main() {
 }
 
 pub fn highlight(code: &str) -> String {
+  use std::collections::HashMap;
+
   let mut highlighted = String::new();
+  let mut current_char = String::new();
+  let mut current_color = String::new();
+  let mut char_to_color: HashMap<char, &str> = HashMap::new();
+
+  char_to_color.insert('L', "red");
+  char_to_color.insert('F', "pink");
+  char_to_color.insert('R', "green");
+
   let mut chars = code.chars();
+
+  // highlighted.push_str(r#"<span style="color: pink">F</span>"#),,
+  // highlighted.push_str(r#"<span style="color: red">L</span>"#),
+  // highlighted.push_str(r#"<span style="color: green">R</span>"#),
+
+  let handle_chars = |color: &str, character: char| {
+    let next = current_char.as_bytes().iter().next().unwrap_or(&0);
+
+    let char_as_string = character.to_string();
+    let this = char_as_string.as_bytes().iter().next().unwrap();
+    
+    if *next != 0 as u8 {
+      if next == this {
+        current_color.push_str(color);
+        current_char.push(character);
+      } else {
+        highlighted.push_str(
+          &format!(
+            r#"<span style="color: {}">{}</span>"#,
+            current_color,
+            current_char
+          )
+        );
+
+        current_color = color.to_string();
+        current_char = character.to_string();
+      }
+    } else {
+      current_color.push_str(color);
+      current_char.push(character);
+    }
+  };
 
   loop {
     match chars.next() {
-      Some('(') => highlighted.push_str("("),
-      Some(')') => highlighted.push_str(")"),
-      Some('F') => highlighted.push_str(r#"<span style="color: pink">F</span>"#),
-      Some('L') => highlighted.push_str(r#"<span style="color: red">L</span>"#),
-      Some('R') => highlighted.push_str(r#"<span style="color: green">R</span>"#),
-      Some(number) => highlighted.push_str(
-        &format!(r#"<span style="color: orange">{}</span>"#, number)
+      Some('(') => (),
+      Some(')') => (),
+      Some(n) if n.is_ascii_digit() => println!("{} -> {}", "is numeric", n),
+      Some(c) if c.is_ascii_alphabetic() => handle_chars(
+        char_to_color.get(&c).unwrap(), 
+        c
       ),
+      Some(_) => break,
       None => break
     }
   }
