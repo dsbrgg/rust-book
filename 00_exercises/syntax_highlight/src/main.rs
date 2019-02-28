@@ -87,6 +87,22 @@ pub fn highlight(code: &str) -> String {
   highlighted
 }
 
+// fuck my life, this was the best
+fn the_best() {
+  extern crate regex;
+  use regex::{Regex, Captures};
+
+  pub fn highlight(code: &str) -> String {
+    let re = Regex::new(r"F+|L+|R+|\d+").unwrap();
+    re.replace_all(code, |c: &Captures| match c[0].chars().next().unwrap() {
+      'F' => format!(r#"<span style="color: pink">{}</span>"#, &c[0]),
+      'L' => format!(r#"<span style="color: red">{}</span>"#, &c[0]),
+      'R' => format!(r#"<span style="color: green">{}</span>"#, &c[0]),
+      _ => format!(r#"<span style="color: orange">{}</span>"#, &c[0]),
+    }).to_string()
+  }
+}
+
 // r#(raw string) negates the need to escape special carachaters
 fn examples_in_description() {
   assert_eq!(
