@@ -1,68 +1,88 @@
 fn main() {
-  highlight("FFFR345F2LL");
+  examples_in_description();
 }
 
 pub fn highlight(code: &str) -> String {
   use std::collections::HashMap;
 
   let mut highlighted = String::new();
-  let mut current_char = String::new();
+  let mut current_string = String::new();
   let mut current_color = String::new();
   let mut char_to_color: HashMap<char, &str> = HashMap::new();
 
   char_to_color.insert('L', "red");
   char_to_color.insert('F', "pink");
   char_to_color.insert('R', "green");
+  char_to_color.insert('0', "orange");
+  char_to_color.insert('1', "orange");
+  char_to_color.insert('2', "orange");
+  char_to_color.insert('3', "orange");
+  char_to_color.insert('4', "orange");
+  char_to_color.insert('5', "orange");
+  char_to_color.insert('6', "orange");
+  char_to_color.insert('7', "orange");
+  char_to_color.insert('8', "orange");
+  char_to_color.insert('9', "orange");
 
-  let mut chars = code.chars();
+  let mut chars = code.chars().enumerate();
 
-  // highlighted.push_str(r#"<span style="color: pink">F</span>"#),,
-  // highlighted.push_str(r#"<span style="color: red">L</span>"#),
-  // highlighted.push_str(r#"<span style="color: green">R</span>"#),
+  let mut handle_chars = |color: &str, character: char, digit: bool, pass: bool, last: bool| {
+    if pass == true {
+      highlighted.push_str(&character.to_string());
+      ()
+    }
 
-  let handle_chars = |color: &str, character: char| {
-    let next = current_char.as_bytes().iter().next().unwrap_or(&0);
+    let next = current_string.as_bytes().iter().next().unwrap_or(&0);
+    let next_value = current_string.chars().next();
+    let mut next_is_digit = false;
+
+    if next_value.is_some() {
+      next_is_digit = next_value.unwrap().is_digit(10);
+    }
 
     let char_as_string = character.to_string();
     let this = char_as_string.as_bytes().iter().next().unwrap();
-    
+
     if *next != 0 as u8 {
-      if next == this {
-        current_color.push_str(color);
-        current_char.push(character);
+      if next == this || next_is_digit && digit {
+        current_string.push(character);
       } else {
         highlighted.push_str(
           &format!(
             r#"<span style="color: {}">{}</span>"#,
             current_color,
-            current_char
+            current_string
           )
         );
 
         current_color = color.to_string();
-        current_char = character.to_string();
+        current_string = character.to_string();
       }
     } else {
       current_color.push_str(color);
-      current_char.push(character);
+      current_string.push(character);
+    }
+
+    if last == true {
+      highlighted.push_str(
+        &format!(
+          r#"<span style="color: {}">{}</span>"#,
+          current_color,
+          current_string
+        )
+      );
     }
   };
 
   loop {
     match chars.next() {
-      Some('(') => (),
-      Some(')') => (),
-      Some(n) if n.is_ascii_digit() => println!("{} -> {}", "is numeric", n),
-      Some(c) if c.is_ascii_alphabetic() => handle_chars(
-        char_to_color.get(&c).unwrap(), 
-        c
-      ),
-      Some(_) => break,
+      Some((index, '(')) => handle_chars("", '(', false, true, index == code.len() - 1),
+      Some((index, ')')) => handle_chars("", ')', false, true, index == code.len() - 1),
+      Some((index, c)) if c.is_ascii_alphabetic() => handle_chars(char_to_color.get(&c).unwrap(), c, false, false, index == code.len() - 1),
+      Some((index, n)) => handle_chars(char_to_color.get(&n).unwrap(), n, true, false, index == code.len() - 1),
       None => break
     }
   }
-
-  println!("{:?}", highlighted);
 
   highlighted
 }
