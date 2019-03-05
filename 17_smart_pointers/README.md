@@ -470,3 +470,110 @@ If a more complex program allocated lots of memory in a cycle and held onto it f
 
 Another solution for avoiding reference cycles is reorganizing your data structures so that some references express ownership and some references don’t. As a result, you can have cycles made up of some ownership relationships and some non-ownership relationships, and only the ownership relationships affect whether or not a value can be dropped.
 
+## Prevent Reference Cycles with `Weak<T>`
+
+`Rc::clone` increases the `strong_count` of an `Rc<T>` instance and an `Rc<T>` instance is only cleaned up if its `strong_count` is 0. You can also create a *weak reference* to the value within an `Rc<T>` instance by calling `Rc::downgrade` and passing a reference to the `Rc<T>`. Calling `Rc::downgrade` will return a smart pointer called `Weak<T>` which will increase the `weak_count` of an `Rc<T>` instead of the `strong_count`. The difference between the two is that `weak_count` doesn't need to be 0 for the `Rc<T>` instance to be cleaned up.
+
+Strong references are how you can share ownership of an `Rc<T>`. Weak references will be broken once the strong reference count of values involved is 0.
+
+`Weak<T>` references might be dropped and to make sure the value still exists, call `upgrade` on the `Weak<T>` instance which will return an `Option<Rc<T>>`. `Some` will return if `Rc<T>` has a value or `None` if the value was dropped.
+
+## Creating a Tree Data Structure
+
+```rust
+use std::rc::{Rc, Weak};
+use std::cell::RefCell;
+
+// we want "Node" to own its children and share that ownership
+// with variable so we can access each "Node" in the tree directly
+// Rc<T> will allow us to share ownership
+// RefCell<T> will allow us to modify which nodes are children of another node
+#[derive(Debug)]
+struct Node {
+  value: i32,
+  // this can't be an Rc<T> or it would create a reference cycle
+  // with leaf.parent pointing to branch and branch.children pointing to leaf
+  // a parent node should own its children, if a parent node is dropped
+  // child nodes should be dropped as well, but child should not own
+  // its parent: dropping a child node should not drop its parent
+  // this is a case for weak references
+  parent: RefCell<Weak<Node>>,
+  children: RefCell<Vec<Rc<Node>>>
+}
+
+fn main() {
+  let leaf = Rc::new(Node {
+    value: 3,
+    parent: RefCell::new(Weak::new()),
+    children: RefCell::new(vec![])
+  });
+
+  println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+
+  let branch = Rc::new(Node {
+    value: 5,
+    parent: RefCell::new(Weak::new()),
+    // leaf now has two owners: leaf and branch
+    // we can get branch to leaf through branch.children
+    children: RefCell::new(vec![Rc::clone(&leaf)])
+  });
+
+  *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+  println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+}
+```
+
+## Visualizing Changes to `strong_count` and `weak_count`
+
+```rust
+fn main() {
+  let leaf = Rc::new(Node {
+    value: 3,
+    parent: RefCell::new(Weak::new()),
+    children: RefCell::new(vec![])
+  });
+
+  println!(
+    "leaf strong = {}, weak = {}",
+    Rc::strong_count(&leaf),
+    Rc::weak_count(&leaf)
+  );
+
+  {
+    let branch = Rc::new(Node {
+      value: 5,
+      parent: RefCell::new(Weak::new()),
+      children: RefCell::new(vec![Rc::clone(&leaf)])
+    });
+
+    *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
+
+    println!(
+      "branch strong = {}, weak = {}",
+      Rc::strong_count(&branch),
+      Rc::weak_count(&branch)
+    );
+
+    println!(
+      "leaf strong = {}, weak = {}",
+      Rc::strong_count(&leaf),
+      Rc::weak_count(&leaf)
+    );
+  }
+
+  println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
+
+  println!(
+    "leaf strong = {}, weak = {}",
+    Rc::strong_count(&leaf),
+    Rc::weak_count(&leaf)
+  );
+}
+```
+
+## Summary
+
+- `Box<T>` type has a known size and points to data allocated on the heap.
+- `Rc<T>` type keeps track of the number of references to data on the heap so that data can have multiple owners.
+- `RefCell<T>` type with its interior multability gives us a type that we can use when we need an immutable type but need to change an inner value of that type.
