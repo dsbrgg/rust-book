@@ -26,3 +26,13 @@ Splitting computation in your program into multiple threads can improve performa
 - Race conditions, where threads are accessing data or resources in an inconsistent order
 - Deadlocks, where two threads are waiting for each other to finish using a resource the other thread has, preventing both threads from continuing
 - Bugs that happen only in certain situations and are hard to reproduce and fix reliably
+
+Many OS provide an API for creating threads. This model of using the OS API for creating threads is called *1:1*, meaning one operating system thread per one language thread.
+
+Programming languages provide their own special implementation of thread. Programming language-provided threads are known as *green* threads, and languages that use these green threads will execute the, in the context of a different number of operating system threads. The green-threaded model is called the *M:N* model: there are `M` green threads pr `N` operating system threads, where `M` and `N` are not necessarily the same number.
+
+Each model has its own advantages and trade-offs, and the trade-off most important to Rust is runtime support. *Runtime* is a confusing term and can have different meanings in different contexts.
+
+In this context, by *runtime* we mean code that is included by the language in every binary. Every non-assembly language will have some amount of runtime code. Colloquially when people say a language has "no runtime", they often mean "small runtime". Smaller runtimes have fewer features but have the advantage of resulting in smaller binaries, which makes it easier to combine the language with other lanaguages in more contexts. Although many languages are okay with increasing the runtime size in exchange for more features, Rust needs to have nearly no runtime and cannot compromise on being able to call into C to maintain performance.
+
+Green-threading M:N model requires a larger language runtime to manage threads. Rust provides natively only 1:1 threading but Rust is low-level enough that there are `crates` that implement `M:N` threading if you rather trade overhead for aspects such as more control over which threads run when and lower costs of context switching, for example.
