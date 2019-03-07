@@ -3,8 +3,14 @@ use std::time::Duration;
 
 fn main() {
   basic_threads();
+
   println!("{}", "============================================");
+
   wait_threads();
+
+  println!("{}", "============================================");
+
+  closure_threads();
 }
 
 fn basic_threads() {
@@ -59,5 +65,23 @@ fn wait_threads() {
   // until the thread represented by the handle terminates
   // "Blocking" a thread means that the thread is prevented from
   // performing work or exiting
+  handle.join().unwrap();
+}
+
+// here we will use the "move" keyword before the parameter list of a closure
+// to force the closure to take ownership of the values it uses in the environment
+// this technique is good when creating threads in order to transfer ownership
+// from one thread to another
+fn closure_threads() {
+  let v = vec![1, 2, 3];
+
+  // we need to use the move keyword here
+  // or else Rust won't compile because
+  // the thread may outlive the "v" variable reference
+  // which would invalidate the program and crash it during runtime
+  let handle = thread::spawn(move || {
+    println!("Here's a vector: {:?}", v);
+  });
+
   handle.join().unwrap();
 }
