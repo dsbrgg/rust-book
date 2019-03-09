@@ -50,3 +50,20 @@ A channel has two halves: a transmitter and a receiver. The transmitter is the u
 Ownership rules play a vital role in message sending because they help you write safe concurrent code. Preventing errors in concurrent programming is the advantage of thinking about ownership throughout your Rust programs.
 
 Allowing to use a value after it's sent down to a *transmitter* is a bad idea: once the value has been sent to another thread, that thread could modify or drop it before we try to use the value again. Other thread's modification could cause errors or unexpected results due to inconsistent or nonexistent data. Because of that, Rust won't allow it to happen and throw a compile error if this situation happens.
+
+## Shared State Concurrency
+
+Message passing is a fine way of handling concurrency, but it's not the only one. Channels in any programming language are similar to single ownership, once you transfer the value down a channel, you should no longeruse that value. Shared memory concurrency is like multiple ownership: multiple threads can access the same memory localtion at the same time.
+
+*Mutex* is an abbreviation for *mutual exclusion*, as in, a mutex allows only one thread to access some data at any given time. To access the data in a mutex, a thread must first signal that it wants access by asking to acquire the mutex's *lock*. The lock is a data structure that is part of the mutex that keeps track of who currently has exclusive access to the data. The mutex is decribed as *guarding* the data it holds via the locking system.
+
+You must remember two rules to use Mutexes:
+
+- You must attempt to acquire teh lock before using the data
+- Whe you're done with the data that the mutex guards, you must unlock the data so other threads can acquire the lock
+
+`RefCell<T>`/`Rc<T>` and `Mutex<T>`/`Arc<T>` are very similar. Mutex provides interior mutability as the `Cell` family does and `Arc` let you share ownership like `Rc` but in a thread safe manner.
+
+But Rust can't protect against all kinds of logic errors when `Mutex<T>` is used. `Mutex<T>` can create *deadlocks*. These occur when an operation needs to lock two resources and two threads have each acquired one of the locks, causing them to wait for each other forever.
+
+> exercise ideas: create a program that intentionally deadlock and research mitigation strategies for it. the standard library API for Mutex and MutexGuard offers useful information

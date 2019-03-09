@@ -5,7 +5,7 @@ use std::time::Duration;
 // mpsc stands for multiple producer single consumer
 // meaning a channel can have mutiple sending ends and 
 // only one receiving end
-use std::sync::mpsc;
+use std::sync::{mpsc, Arc, Mutex};
 
 fn main() {
   println!("{}", "\n============================================\n");
@@ -31,6 +31,14 @@ fn main() {
   println!("{}", "\n============================================\n");
 
   multiple_tx();
+
+  println!("{}", "\n============================================\n");
+
+  single_thread_mutex();
+
+  println!("{}", "\n============================================\n");
+
+  multiple_thread_mutex();
 
   println!("{}", "\n============================================\n");
 }
@@ -206,4 +214,69 @@ fn multiple_tx() {
   for received in rx {
     println!("Got: {}", received);
   }
+}
+
+fn single_thread_mutex() {
+  let m = Mutex::new(5);
+
+  {
+    // we use the lock method to acquire the lock
+    // this call will block the current thread so
+    // it can't do any work until it's our turn to have the lock
+    // this call would fail if another thread holding the lock panicked and
+    // no one would ever be able to get the lock
+    // by unwrapping, we have this thread panicking if we're
+    // in that situation
+
+    // Mutex<T> is a smart pointer
+    // the lock method returns a MutexGuard that
+    // implements Deref to point to our inner data
+    // it also implements Drop which will release the lock
+    // automatically when a MutexGuard goes out of scope
+    // with these we won't forget to release the lock and
+    // blocking the mutex from being used by other threads
+    let mut num = m.lock().unwrap();
+    *num = 6;
+  }
+
+  println!("m = {:?}", m);
+}
+
+fn multiple_thread_mutex() {
+  // Arc<T> is a type like Rc<T> that is safe to use in concurrent situations(share across threads)
+  // the "A" stands for atomic, meaning it's an atomically reference counted type
+  // atomics are a kind of concurrency primitive(check std::sync::atomic for more details)
+
+  // not all primitives are atomic by default because
+  // thread safety comes with a performance penalty that
+  // should be used only when needed
+  // if your program runs in a single thread
+  // there's no need to have that, which would make your program slower
+
+  // Arc<T> and Rc<T> have the same API
+  let counter = Arc::new(Mutex::new(0));
+  let mut handles = vec![];
+
+  for _ in 0..10 {
+    // we clone with Arc to let the counter have multiple ownership
+    // just like when we saw on the last chapter with Rc<T>
+    // the difference, like said before is that Arc is thread safe
+    // if we didn't use Arc, we would move the counter variable
+    // and Rust would throw a compile error since counter would
+    // be moved on the first iteration
+    let counter = Arc::clone(&counter);
+    let handle = thread::spawn(move || {
+      let mut num = counter.lock().unwrap();
+
+      *num += 1;
+    });
+
+    handles.push(handle);
+  }
+
+  for handle in handles {
+    handle.join().unwrap();
+  }
+
+  println!("Result: {}", *counter.lock().unwrap());
 }
