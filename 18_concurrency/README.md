@@ -47,4 +47,6 @@ A channel has two halves: a transmitter and a receiver. The transmitter is the u
 
 > exercise ideas: chat system; system that perform calculations on different threads and sends to another to aggregate results
 
+Ownership rules play a vital role in message sending because they help you write safe concurrent code. Preventing errors in concurrent programming is the advantage of thinking about ownership throughout your Rust programs.
 
+Allowing to use a value after it's sent down to a *transmitter* is a bad idea: once the value has been sent to another thread, that thread could modify or drop it before we try to use the value again. Other thread's modification could cause errors or unexpected results due to inconsistent or nonexistent data. Because of that, Rust won't allow it to happen and throw a compile error if this situation happens.

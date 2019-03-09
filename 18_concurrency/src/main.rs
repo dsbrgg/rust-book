@@ -17,7 +17,11 @@ fn main() {
   println!("{}", "\n============================================\n");
 
   channels();
-  
+
+  println!("{}", "\n============================================\n");
+
+  channels_iterator();
+
   println!("{}", "\n============================================\n");
 }
 
@@ -130,4 +134,34 @@ fn channels() {
   // does other work until checking again
   let received = rx.recv().unwrap();
   println!("Got: {}", received);
+}
+
+fn channels_iterator() {
+  use std::sync::mpsc;
+
+  let (tx, rx) = mpsc::channel();
+
+  thread::spawn(move || {
+    let vals = vec![
+      String::from("hi"),
+      String::from("from"),
+      String::from("the"),
+      String::from("thread")
+    ];
+
+    for val in vals {
+      tx.send(val).unwrap();
+      thread::sleep(Duration::from_millis(2));
+    }
+  });
+
+  // here we treat rx as an iterator
+  // we can use the value directly
+  // since we don't have code that pauses or delays
+  // in the for loop, we can tell that the
+  // main thread is waiting to receive values
+  // from the spawned thread
+  for received in rx {
+    println!("Got: {}", received);
+  }
 }
