@@ -1,5 +1,11 @@
+
 use std::thread;
 use std::time::Duration;
+
+// mpsc stands for multiple producer single consumer
+// meaning a channel can have mutiple sending ends and 
+// only one receiving end
+use std::sync::mpsc;
 
 fn main() {
   println!("{}", "\n============================================\n");
@@ -21,6 +27,10 @@ fn main() {
   println!("{}", "\n============================================\n");
 
   channels_iterator();
+
+  println!("{}", "\n============================================\n");
+
+  multiple_tx();
 
   println!("{}", "\n============================================\n");
 }
@@ -99,11 +109,6 @@ fn closure_threads() {
 }
 
 fn channels() {
-  // mpsc stands for multiple producer single consumer
-  // meaning a channel can have mutiple sending ends and 
-  // only one receiving end
-  use std::sync::mpsc;
-
   // mpsc::channel returns a tuple
   // first element is the sending end
   // sencond element in the receiving end
@@ -137,8 +142,6 @@ fn channels() {
 }
 
 fn channels_iterator() {
-  use std::sync::mpsc;
-
   let (tx, rx) = mpsc::channel();
 
   thread::spawn(move || {
@@ -161,6 +164,45 @@ fn channels_iterator() {
   // in the for loop, we can tell that the
   // main thread is waiting to receive values
   // from the spawned thread
+  for received in rx {
+    println!("Got: {}", received);
+  }
+}
+
+fn multiple_tx() {
+  let (tx, rx) = mpsc::channel();
+
+  // this will give us a new sending handle
+  let tx1 = mpsc::Sender::clone(&tx);
+  thread::spawn(move || {
+    let vals = vec![
+      String::from("hi"),
+      String::from("from"),
+      String::from("the"),
+      String::from("thread")
+    ];
+
+    for val in vals {
+      tx1.send(val).unwrap();
+      thread::sleep(Duration::from_millis(2));
+    }
+  });
+
+  // pass the original sending end to this thread
+  thread::spawn(move || {
+    let vals = vec![
+      String::from("more"),
+      String::from("messages"),
+      String::from("for"),
+      String::from("you")
+    ];
+
+    for val in vals {
+      tx.send(val).unwrap();
+      thread::sleep(Duration::from_millis(2));
+    }
+  });
+
   for received in rx {
     println!("Got: {}", received);
   }
