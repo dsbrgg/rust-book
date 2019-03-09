@@ -36,3 +36,15 @@ Each model has its own advantages and trade-offs, and the trade-off most importa
 In this context, by *runtime* we mean code that is included by the language in every binary. Every non-assembly language will have some amount of runtime code. Colloquially when people say a language has "no runtime", they often mean "small runtime". Smaller runtimes have fewer features but have the advantage of resulting in smaller binaries, which makes it easier to combine the language with other lanaguages in more contexts. Although many languages are okay with increasing the runtime size in exchange for more features, Rust needs to have nearly no runtime and cannot compromise on being able to call into C to maintain performance.
 
 Green-threading M:N model requires a larger language runtime to manage threads. Rust provides natively only 1:1 threading but Rust is low-level enough that there are `crates` that implement `M:N` threading if you rather trade overhead for aspects such as more control over which threads run when and lower costs of context switching, for example.
+
+## Message Passing to Transfer Data Between Threads
+
+A popular approach to ensure safe concurrency is *message passing*, where threads or actors communicate by sending each other messages containing data.
+
+One major toll Rust has for message-sending concurrency is a programming concept called *channel*. Imagine a channel of water, such a stream of a river. If you put something like a rubber duck or a boat into a stream, it will travel downstream to the end of the waterway.
+
+A channel has two halves: a transmitter and a receiver. The transmitter is the upstream location where you put ruber ducks into the river, the receiver is where the rubber duck ends up downstream. A channel is said to be *closed* if either the transmitter or receiver is dropped.
+
+> exercise ideas: chat system; system that perform calculations on different threads and sends to another to aggregate results
+
+

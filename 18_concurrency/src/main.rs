@@ -2,15 +2,23 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
+  println!("{}", "\n============================================\n");
+
   basic_threads();
 
-  println!("{}", "============================================");
+  println!("{}", "\n============================================\n");
 
   wait_threads();
 
-  println!("{}", "============================================");
+  println!("{}", "\n============================================\n");
 
   closure_threads();
+
+  println!("{}", "\n============================================\n");
+
+  channels();
+  
+  println!("{}", "\n============================================\n");
 }
 
 fn basic_threads() {
@@ -84,4 +92,42 @@ fn closure_threads() {
   });
 
   handle.join().unwrap();
+}
+
+fn channels() {
+  // mpsc stands for multiple producer single consumer
+  // meaning a channel can have mutiple sending ends and 
+  // only one receiving end
+  use std::sync::mpsc;
+
+  // mpsc::channel returns a tuple
+  // first element is the sending end
+  // sencond element in the receiving end
+  let (tx, rx) = mpsc::channel();
+
+  // the spawned thread needs to own the tx end
+  // of the channel to be able to send messages
+  // through the channel
+  thread::spawn(move || {
+    let val = String::from("hi");
+    // the send method returns a Result<T, E>
+    // if the rx end has already been dropped
+    // the send operation will return an error
+    tx.send(val).unwrap();
+  });
+
+  // rx end has two useful methods: recv and try_recv
+
+  // recv will block the main thread's execution and wait
+  // until a value is sent down the channel
+
+  // try_recv doesn't block but will return a Result<T, E>
+  // immediately: an Ok value holding the message or an Err value
+  // if there aren't any messages
+  // using try_recv is useful if this thread has other work to do while
+  // waiting for messages, we could write a loop that calls try_recv
+  // every so often, handles a message if one is available and otherwise
+  // does other work until checking again
+  let received = rx.recv().unwrap();
+  println!("Got: {}", received);
 }
