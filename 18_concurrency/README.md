@@ -67,3 +67,15 @@ You must remember two rules to use Mutexes:
 But Rust can't protect against all kinds of logic errors when `Mutex<T>` is used. `Mutex<T>` can create *deadlocks*. These occur when an operation needs to lock two resources and two threads have each acquired one of the locks, causing them to wait for each other forever.
 
 > exercise ideas: create a program that intentionally deadlock and research mitigation strategies for it. the standard library API for Mutex and MutexGuard offers useful information
+
+## Extensible Concurrency with `Send` and `Sync` traits
+
+Embedded in the language, there are two concurrency concepts: the `std::marker` traits `Sync` and `Send`.
+
+`Send` trait indicates that ownership of the type implementing `Send` can be transferred between threads. Almost every Rust type is `Send`, but there are some exceptions, like `Rc<T>` which is intended for single thread circunstances. Any type composed entirely of `Send` types is automatically marked as `Send` as well. Almost all primitive types are `Send`, aside from raw pointers.
+
+`Sync` trait indicates that it is safe for the type implementing `Sync` to be referenced from multiple threads. In other words, any type `T` is `Sync` if `&T`(a reference to `T`) is `Send`, meaning the reference can be sent safely to anotehr thread. Similar to `Send`, primitive types are `Sync`, and types composed entirely of types that are `Sync` are also `Sync`.
+
+All of the related family `Cell<T>` types are not `Sync` as well, the implementation of the borrow checking that `RefCell<T>`(for example) does at runtime is not thread-safe.
+
+Manually implementing therese traits involves implementing unsafe Rust code. Building new concurrent types not made up if `Send` and `Sync` parts require careful thought to uphold the safety guarantees.
