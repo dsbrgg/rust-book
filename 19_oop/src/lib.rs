@@ -1,3 +1,16 @@
+/**
+ * This is a implementation of the State Pattern from OOP
+ * with Rust just to show how Rust can be adapted to this kind
+ * of pattern but, this leads to a couple of problems and doesn't really
+ * uses Rust strength and leaves some work for runtime.
+ * If this implementation used Rust's type system guarantees and its
+ * actual strengths, it would make it much better, you can see that here:
+ * https://doc.rust-lang.org/book/ch17-03-oo-design-patterns.html#encoding-states-and-behavior-as-types
+ * 
+ * Object oriented solutions won't always be the best one for Rust, specially because
+ * of its features like Ownership, which OOP does not take into account
+ */
+
 pub struct Post {
   state: Option<Box<dyn State>>,
   content: String,
@@ -127,7 +140,7 @@ impl State for PendingReview {
   }
 
   fn reject(self: Box<Self>) -> Box<dyn State> {
-    Box::new(Draft{})
+    Box::new(Draft {})
   }
 }
 
