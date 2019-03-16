@@ -173,3 +173,12 @@ impl <T> Screen<T>
     }
   }
 ```
+
+## Object Safety is Required for Trait Objects
+
+You can only make *object-safe* traits into trait objects. Two rules are relevant for this:
+
+- The return type isn't `Self`
+- There are no generic parameters
+
+The `Self` keyword is an alias for the type we're implementing the traits or methods on. Trait objects must be object safe because once you've used a trait object, Rust no longer knows the concrete type that's implementing the trait. If a trait method returns the concrete type `Self`, but a trait object forgets the exact type that `Self` is, there is no way the method can use the original concrete type. The same is true for generic type parameters that are filled in with concrete type parameters when a trait is used: the concrete types become part of the type that implements the trait. There is no way to know what types to fill in the generic type parameters with. [More on object safety](https://github.com/rust-lang/rfcs/blob/master/text/0255-object-safety.md)
