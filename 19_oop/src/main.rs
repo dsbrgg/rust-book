@@ -30,7 +30,7 @@ fn main() {
   // we'll only interact with this Post type
   // the states will change in response to its methods
   // called by our library's user
-  let mut post = Post::new();
+  let mut post = Post::new(); 
 
   // this will add the blog post into the draft state
   post.add_text("I ate a salad for lunch today");
@@ -42,4 +42,15 @@ fn main() {
 
   post.approve();
   assert_eq!("I ate a salad for lunch today", post.content());
+
+  let mut another_post = Post::new();
+
+  another_post.add_text("I ate a salad for lunch today");
+  assert_eq!("", another_post.content());
+
+  another_post.request_review();
+  assert_eq!("", another_post.content());
+
+  another_post.reject();
+  assert_eq!("", another_post.content());
 }
