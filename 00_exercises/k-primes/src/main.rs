@@ -20,6 +20,9 @@ fn main() {
 // }
 
 
+// factor a value to get it's prime factors
+// https://www.geeksforgeeks.org/almost-prime-numbers/
+// http://www.mesacc.edu/~scotz47781/mat120/notes/radicals/simplify/images/examples/prime_factorization.html
 fn factor(mut num: u64) -> u64 {
   let mut c = 0;
 
