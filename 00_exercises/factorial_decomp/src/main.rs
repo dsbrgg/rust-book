@@ -29,13 +29,12 @@ fn factor(n: &i32) -> u64 {
 fn decomp(n: i32) -> String {
   use std::collections::HashMap;
 
-  let mut stop = false;
   let mut exp: HashMap<i32, i32> = HashMap::new();
   let mut factorial = (2..=n).fold(1, |acc, num| acc * num);
 
   let mut i = 2;
 
-  while !stop {
+  loop {
     factorial = factorial / i;
     println!("i == {}", i);
     println!("factorial == {}", factorial);
@@ -46,16 +45,12 @@ fn decomp(n: i32) -> String {
         None => exp.insert(i.clone(), i),
         Some(v) => exp.insert(i.clone(), *v + 1),
       };
+
+      if factorial / i == 0 { break; }
     } else {
       i += 1;
-      println!("i == {}", i);
-      if factor(&i) > 1 {
-        i += 1;
-      }
 
-      if i == 11 {
-        break;
-      }
+      if factor(&i) > 1 { i += 1; }
     }
   }
 
