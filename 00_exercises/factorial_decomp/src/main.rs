@@ -31,6 +31,7 @@ fn decomp(n: i32) -> String {
   use std::collections::HashMap;
 
   let mut exp: HashMap<usize, i32> = HashMap::new();
+  // https://users.rust-lang.org/t/panicked-at-arithmetic-operation-overflowed/4290
   let mut factorial: usize = (2..=n).fold(1, |acc, num| acc.wrapping_mul(num as usize));
 
   let mut i = 2;
