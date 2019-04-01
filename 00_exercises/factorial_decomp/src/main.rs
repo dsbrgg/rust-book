@@ -30,7 +30,9 @@ fn factor(n: &usize) -> u64 {
 fn decomp(n: i32) -> String {
   use std::collections::HashMap;
 
+  let mut primes: Vec<usize> = Vec::new();
   let mut exp: HashMap<usize, i32> = HashMap::new();
+  // numbers will overflow when doing the factorization, so it needs wrapping
   // https://users.rust-lang.org/t/panicked-at-arithmetic-operation-overflowed/4290
   let mut factorial: usize = (2..=n).fold(1, |acc, num| acc.wrapping_mul(num as usize));
 
@@ -47,6 +49,11 @@ fn decomp(n: i32) -> String {
         Some(v) => exp.insert(i.clone(), *v + 1),
       };
 
+      match primes.iter().find(|&p| p == &i) {
+        None => primes.push(i),
+        Some(_p) => (),
+      };
+
       if factorial / i == 0 { break; }
     } else {
       i += 1;
@@ -55,9 +62,21 @@ fn decomp(n: i32) -> String {
     }
   }
 
+  let mut builder = String::new();
 
+  for (i, p) in primes.iter().enumerate() {
+    let t = exp.get(&p).unwrap();
 
-  println!("{:#?}", exp);
+    if *t != 1 {
+      builder.push_str(&format!("{}^{}", p, t));
+    } else {
+      builder.push_str(&format!("{}", p));
+    }
 
-  String::new()
+    if i != primes.len() - 1 {
+      builder.push_str(&" * "[..]);
+    }
+  }
+  println!("{:?}", builder);
+  builder
 }
