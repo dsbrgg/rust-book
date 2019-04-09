@@ -33,3 +33,63 @@ You can take four actions in unsafe Rust, called *unsafe superpowers*, that you 
 With `unsafe`, you'll know that any errors related to memory safety must be within an `unsafe` block. Keep `unsafe` blocks small.
 
 Isolate unsafe code as much as possible, it's best to enclose unsafe code within a safe abstraction and provide a safe API. Parts of the standard library are implemented as safe abstractions over unsafe code that has been audited. Wrapping unsafe code in a safe abstraction prevents uses of the `unsafe` from leaking out into all the places that you or your users might want to use the functionality implemented with `unsafe` code, because using a safe abstraction is safe.
+
+## Dereferencing a Raw Pointer
+
+Rustc ensures references are always valid. Unsafe Rust has two new types called *raw pointers* that are similar to references. As with references, raw pointers can be immutable or mutable and are written as `*const T` and `*mut T`(the asterisk **isn't** the dereference operator, it's part of the type name). In the context of raw pointers, *immutable* means that the pointer can't be directly assigned to after being dereferenced.
+
+Different from references and smart pointers, raw pointers:
+
+- Ignore the borrowing rules by having both immutable and mutable pointers or multiple mutable pointers to the same location
+- Aren't guaranteed to point to valid memory
+- Are allowed to be null
+- Don't implement any automatic cleanup
+
+This allows for greater performance or the ability to interface with another language or hardware where Rust's guarantees don't apply.
+
+One major use case for raw pointer is when interfacing with C code. Another case is when building up safe abstractions that the borrow checker doesn't understand.
+
+```rust
+let mut num = 5;
+
+/*
+  ********* SAFE ***************
+
+  * Notice there's no need to use 'unsafe'
+  * We can create raw pointers in safe code
+  * We can't dereference raw pointers outside an unsafe block
+  ------------------------------------------------------------
+  * Because we've created these raw pointers
+  * directly from references guaranteed to be valid
+  * we know these particular raw pointers are valid
+  ------------------------------------------------------------
+  * Notice also here that we have both a mutable pointer
+  * and an immutable pointer, pointing to the same location
+  * in memory, potentially creating a data race!
+*/
+let r1 = &num as *const i32;
+let r2 = &mut num as *mut i32;
+
+/*
+  * Creating raw pointers does no harm; only when we try
+  * to access the value that it points at that we
+  * might end up dealing with an invalid value
+*/
+unsafe {
+  println!("r1 is {}", *r1);
+  println!("r2 is {}", *r2);
+}
+
+/*
+  ********* UNSAFE ***************
+
+  * Here we create a raw pointer to an
+  * arbitrary location in memory
+  * trying to use arbitraty memory is undefined:
+  * there might be data at that address or there might be not
+  * the compiler might optimize the code so there is no memory access,
+  * or the program might error with segmentation fault
+*/
+let address = 0x012345usize;
+let r = address as *const i32;
+```
