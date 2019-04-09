@@ -93,3 +93,26 @@ unsafe {
 let address = 0x012345usize;
 let r = address as *const i32;
 ```
+
+## Calling Unsafe Function or Method
+
+```rust
+/*
+  * The unsafe keyword in this context indicates the function
+  * has requirements we need to uphold when we call this function
+  * because Rust can't guarantee we've met these requirements
+*/
+unsafe fn dangerous() {}
+
+/*
+  * By calling an unsafe function within an `unsafe` block
+  * we're saying that we've read this function's documentation
+  * and take responsability for it
+*/
+unsafe {
+  dangerous();
+}
+```
+
+## Creating a safe abstraction over unsafe code
+
