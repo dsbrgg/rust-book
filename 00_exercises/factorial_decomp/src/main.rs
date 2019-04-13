@@ -1,11 +1,11 @@
 fn main() {
-  decomp(12); // "2^10 * 3^5 * 5^2 * 7 * 11"
+  // decomp(12); // "2^10 * 3^5 * 5^2 * 7 * 11"
   decomp(22); // "2^19 * 3^9 * 5^4 * 7^3 * 11^2 * 13 * 17 * 19"
 }
 
-fn factor(n: &usize) -> u64 {
+fn factor(n: usize) -> u64 {
   let mut c = 0;
-  let mut num = n.clone() as u64;
+  let mut num = n as u64;
 
   while num % 2 == 0 {
     num = num / 2;
@@ -41,31 +41,26 @@ fn decomp(n: i32) -> String {
   loop {
     if factorial % i == 0 {
       factorial = factorial / i;
-
+      println!("i -> {}\ni x {:?}\nfactorial -> {}\nmodulo -> {}\n", i, exp.get(&i), factorial, factorial % i);
       let value = exp.get(&i);
 
       match value {
-        None => exp.insert(i.clone(), 1),
-        Some(v) => exp.insert(i.clone(), *v + 1),
-      };
-
-      match primes.iter().find(|&p| p == &i) {
-        None => primes.push(i),
-        Some(_p) => (),
+        None => { exp.insert(i, 1);  primes.push(i); () },
+        Some(v) => { exp.insert(i, *v + 1); () },
       };
 
       if factorial / i == 0 { break; }
     } else {
       i += 1;
 
-      if factor(&i) > 1 { i += 1; }
+      if factor(i) > 1 { i += 1; }
     }
   }
 
   let mut builder = String::new();
 
   for (i, p) in primes.iter().enumerate() {
-    let t = exp.get(&p).unwrap();
+    let t = exp.get(p).unwrap();
 
     if *t != 1 {
       builder.push_str(&format!("{}^{}", p, t));
