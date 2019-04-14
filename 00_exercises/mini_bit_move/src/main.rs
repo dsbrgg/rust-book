@@ -6,27 +6,21 @@ fn main() {
 fn interpreter(cmd: &str, bits: &str) -> String {
   let mut index = 1;
   let mut result = String::new();
-  let mut last_cmd = String::new();
-  let instructions = cmd.chars().cycle();
+  let mut verifier = cmd.chars().peekable();
+  let mut instructions = cmd.chars().cycle();
   
-  for instruction in instructions {
-    println!("{} - {}", instruction, index);
+  loop {
+    verifier.next();
+
+    let instruction = instructions.next();
+    println!("{:?} - {}", instruction, index);
     match instruction {
-      '0' => {
-        if last_cmd.len() > 0 && last_cmd[..] == "0"[..] { 
-          result.push('0');
-        } else {
-          last_cmd.push('0');
-        }
-
+      Some('0') => {
         index += 1;
-      },
-      '1' => {
-        if last_cmd.len() > 0 && last_cmd[..] != "1"[..] { 
-          last_cmd.pop();
-          last_cmd.push('1'); 
-        }
 
+        if verifier.peek() == Some(&&'0') { result.push('0'); }
+      },
+      Some('1') => {
         if index > bits.len() { break; }
 
         if bits[index-1..index] == "0"[..] {
