@@ -1,7 +1,16 @@
 fn main() {
-  gap(2, 100, 110); // Some((101, 103))
-  // gap(4, 100, 110); // Some((103, 107))
+  assert_eq!(gap(2, 100, 110), Some((101, 103)));
+  assert_eq!(gap(4, 100, 110), Some((103, 107)));
+  assert_eq!(gap(6, 100, 110), None);
+  assert_eq!(gap(8, 300, 400), Some((359, 367)));
 }
+
+// interesting implementation to check if it is prime
+// assumption x > 2
+// fn is_prime(x: u64) -> bool {
+//   let sqrt_x = (x as f64).sqrt() as u64;
+//   (2..sqrt_x + 1).all(|t| x % t != 0)
+// }
 
 fn is_prime(n: u64) -> bool {
   if n <= 3 {
@@ -22,20 +31,25 @@ fn is_prime(n: u64) -> bool {
 
 fn gap(g: i32, m: u64, n: u64) -> Option<(u64, u64)> {
   let primes = (m..=n)
-    .inspect(|x| println!("x -> {:?}\nis_prime -> {:?}\n", x, is_prime(*x)))
     .fold((0, 0), |mut tuple, x| {
       let p = is_prime(x);
 
       match tuple {
         (0, 0) if p => tuple.0 = x,
-        (y, 0) if p => tuple.1 = x,
-        (y, z) if p && ((y - z) as i64) < 0 => tuple.0 = x,
-        (y, z) if p && z - y != g as u64 => tuple.1 = x,
+        (_, 0) if p => tuple.1 = x,
+        (y, z) if p && ((z - y) as i32) != g => {
+          tuple.0 = z; 
+          tuple.1 = x;
+        },
         _ => (),
       };
 
       tuple
     });
-    
-  Some((1, 1))
+
+  if ((primes.1 - primes.0) as i32) == g {
+    Some(primes)
+  } else {
+    None
+  }
 }
