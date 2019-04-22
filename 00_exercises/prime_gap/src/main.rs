@@ -31,13 +31,12 @@ fn is_prime(n: u64) -> bool {
 
 fn gap(g: i32, m: u64, n: u64) -> Option<(u64, u64)> {
   let primes = (m..=n)
+    .filter(|x| is_prime(*x))
     .fold((0, 0), |mut tuple, x| {
-      let p = is_prime(x);
-
       match tuple {
-        (0, 0) if p => tuple.0 = x,
-        (_, 0) if p => tuple.1 = x,
-        (y, z) if p && ((z - y) as i32) != g => {
+        (0, 0) => tuple.0 = x,
+        (_, 0) => tuple.1 = x,
+        (y, z) if ((z - y) as i32) != g => {
           tuple.0 = z; 
           tuple.1 = x;
         },
