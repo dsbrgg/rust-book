@@ -38,13 +38,12 @@ fn is_sum_of_cubes(s: &str) -> String {
 
   if sum.len() == 0 { 
     sum.push_str("Unlucky"); 
-    println!("{:?}", sum);
     return sum;
   }
 
   sum.push_str(
     &format!("{} Lucky", add.to_string())
   );
-println!("{:?}", sum);
+
   sum
 }
