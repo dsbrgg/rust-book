@@ -8,11 +8,12 @@ extern crate regex;
 use regex::Regex;
 
 fn is_sum_of_cubes(s: &str) -> String {
+  let mut add = 0;
   let mut sum = String::new();
   let re = Regex::new(r"(\d){1,3}").unwrap();
 
   for sp in re.captures_iter(s) {
-    let mut c = sp[0].chars();
+    let c = sp[0].chars();
     let mut og = String::new();
 
     let mut result = 0;
@@ -28,6 +29,7 @@ fn is_sum_of_cubes(s: &str) -> String {
     let parsed = og.parse::<u32>().unwrap();
 
     if parsed == result {
+      add += result;
       sum.push_str(
         &format!("{} ", &result.to_string())
       ); 
@@ -36,12 +38,13 @@ fn is_sum_of_cubes(s: &str) -> String {
 
   if sum.len() == 0 { 
     sum.push_str("Unlucky"); 
+    println!("{:?}", sum);
     return sum;
   }
 
   sum.push_str(
-    &format!("{}Lucky", sum)
+    &format!("{} Lucky", add.to_string())
   );
-
+println!("{:?}", sum);
   sum
 }
