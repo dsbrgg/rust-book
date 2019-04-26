@@ -12,32 +12,34 @@ fn is_sum_of_cubes(s: &str) -> String {
   let mut sum = String::new();
   let re = Regex::new(r"(\d){1,3}").unwrap();
 
-  for sp in re.captures_iter(s) {
-    let c = sp[0].chars();
-    let mut og = String::new();
+  re.captures_iter(s)
+    .for_each(|sp| {
+      let c = sp[0].chars();
+      let mut og = String::new();
 
-    let mut result = 0;
-    for n in c {
-      og.push(n);
+      let result = c.fold(0, |mut acc, n| {
+        og.push(n);
 
-      result += n
-        .to_digit(10)
-        .unwrap()
-        .pow(3);
-    }
+        acc += n
+          .to_digit(10)
+          .unwrap()
+          .pow(3);
 
-    let parsed = og.parse::<u32>().unwrap();
+        acc
+      });
 
-    if parsed == result {
-      add += result;
-      sum.push_str(
-        &format!("{} ", &result.to_string())
-      ); 
-    }
-  }
+      let parsed = og.parse::<u32>().unwrap();
+
+      if parsed == result {
+        add += result;
+        sum.push_str(
+          &format!("{} ", &result.to_string())
+        ); 
+      }
+    });
 
   if sum.len() == 0 { 
-    sum.push_str("Unlucky"); 
+    sum.push_str("Unlucky");
     return sum;
   }
 
