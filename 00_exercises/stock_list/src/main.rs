@@ -11,6 +11,10 @@ fn main() {
 fn stock_list(list_art: Vec<&str>, list_cat: Vec<&str>) -> String {
   use std::collections::HashMap;
 
+  if list_art.len() == 0 || list_cat.len() == 0 {
+    return String::new();
+  }
+
   let mut stock = String::new();
   let mut totals: HashMap<String, u64> = HashMap::new();
 
