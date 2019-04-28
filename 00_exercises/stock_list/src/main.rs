@@ -3,14 +3,15 @@ fn main() {
   let mut c = vec!["A", "B", "C", "D"];
   assert_eq!(stock_list(b, c), "(A : 0) - (B : 1290) - (C : 515) - (D : 600)");
 
-  // b = vec!["ABAR 200", "CDXE 500", "BKWR 250", "BTSQ 890", "DRTY 600"];
-  // c = vec!["A", "B"];
-  // assert_eq!(stock_list(b, c), "(A : 200) - (B : 1140)");
+  b = vec!["ABAR 200", "CDXE 500", "BKWR 250", "BTSQ 890", "DRTY 600"];
+  c = vec!["A", "B"];
+  assert_eq!(stock_list(b, c), "(A : 200) - (B : 1140)");
 }
 
 fn stock_list(list_art: Vec<&str>, list_cat: Vec<&str>) -> String {
   use std::collections::HashMap;
 
+  let mut stock = String::new();
   let mut totals: HashMap<String, u64> = HashMap::new();
 
   let codes: Vec<Vec<_>> = list_art
@@ -31,20 +32,12 @@ fn stock_list(list_art: Vec<&str>, list_cat: Vec<&str>) -> String {
         *t += code[1].parse::<u64>().unwrap();
       }
     }
+
+    match stock.len() == 0 {
+      true => stock.push_str(&format!("({} : {})", category, t)),
+      false => stock.push_str(&format!(" - ({} : {})", category, t)),
+    }
   }
 
-  let t = totals
-    .iter()
-    .fold(String::new(), |mut string, (code, qty)| {
-      match string.len() == 0 {
-        true => string.push_str(&format!("({} : {})", code, qty)),
-        false => string.push_str(&format!(" - ({} : {})", code, qty)),
-      }
-      
-      string
-    });
-
-    println!("{:?}", t);
-
-  String::from("(A : 0) - (B : 1290) - (C : 515) - (D : 600)")
+  stock
 }
