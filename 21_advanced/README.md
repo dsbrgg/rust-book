@@ -116,3 +116,88 @@ unsafe {
 
 ## Creating a safe abstraction over unsafe code
 
+Wrapping unsafe code in a safe function is a common abstraction. Let's study the function `split_at_mut` from the `std` library to better understand this.
+
+```rust
+fn split_at_mut(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+  let len = slice.len();
+
+  assert!(mid <= len);
+
+  // This will panic
+  // Rust borrow checker can't understand that
+  // we're borrowing different parts of the slice,
+  // it only knows we're borrowing from the same slice twice
+  // This is fundamentally ok since the two slices don't overlap
+  // but the compiler isn't smart enough to know this
+  // unsafe code is needed here
+  (&mut slice[..mid],
+   &mut slice[mid..])
+
+   // ----- CORRECT WAY ----------
+
+   use std::slice;
+
+   let len = slice.len();
+   // with the following method, we access the raw pointer of the slice
+   // in this case, it will return a '*mut i32'
+   let ptr = slice.as_mut_ptr();
+
+   assert!(mid <= len);
+
+  // slice::from_raw_parts_mut is unsafe because it takes a raw pointer
+  // and must trust that this pointer is valid
+  // the offset method is also unsafe because it must trust that the
+  // offset location is also a valid pointer
+
+   unsafe {
+     (slice::from_raw_parts_mut(ptr, mid),
+      slice::from_raw_parts_mut(ptr.offset(mid as isize), len - mid))
+   }
+}
+
+let mut v = vec![1, 2, 3, 4, 5, 6];
+
+let r = &must v[..];
+
+let (a, b) = r.split_at_mut(3);
+
+assert_eq!(a, &mut [1, 2, 3]);
+assert_eq!(b, &mut [4, 5, 6]);
+```
+
+## `extern` function to call external code
+
+When Rust needs to interact with code written in another language, it uses the `extern` keyword, that facilitates the creation and use of a *Foreign Function Interface(FFI)*.
+
+FFI is a way for a programming language to define functions and enable a different programming language to call those functions.
+
+```rust
+// here we list the names and signatures of external functions from
+// another language we want to call. The "C" part defines the
+// application binary interface (ABI). The ABI defines how to call
+// the function at the assembly level
+extern "C" {
+  fn abs(input: i32) -> i32;
+}
+
+fn main() {
+  unsafe {
+    println!("Absolute value of -3 according to C: {}", abs(-3));
+  }
+}
+```
+
+You can also call Rust's function on other languages by adding the `extern` keyword and specify the ABI to use just before the `fn` keyword.
+
+```rust
+// the no_mangle annotation is due to Mangling in the compiler.
+// mangling is when the compiler changes the name we've given a function
+// to a different name that contains more information for the other parts of
+// the compilation process to consume, but is less human readable
+// for Rust's function to be nameable by other languages, we must disable this
+#[no_mangle]
+pub extern "C" fn call_from_c() {
+  println!("Just called a Rust function from C!");
+}
+```
