@@ -201,3 +201,43 @@ pub extern "C" fn call_from_c() {
   println!("Just called a Rust function from C!");
 }
 ```
+
+## Accessing or Modifying a Mutable Static Variable
+
+Constants and immutable static variables might seem similar, but a subtle difference is that values in a static variable have a fixed address in memory. Using the value will always access the same data. Constants, on the other hand, are allowed to duplicate their data whenever they’re used.
+
+Another difference between constants and static variables is that static variables can be mutable. Accessing and modifying mutable static variables is *unsafe*.
+
+```rust
+static mut COUNTE: u32 = 0;
+
+fn add_to_count(inc: u32) {
+  unsafe {
+    COUNTER += inc;
+  }
+}
+
+// This compiles as expected because it's single threaded
+// Having multiple threads access COUNTER would likely result in data races
+fn main() {
+  add_to_count(3);
+
+  unsafe {
+    println!("Counter: {}", COUNTER);
+  }
+}
+```
+
+## Implementing Unsafe Trait
+
+```rust
+unsafe trait Foo {
+  // methods go here
+}
+
+// by using "unsafe impl" we're promising there we'll
+// uphold the invariants that the compiler can't verify
+unsafe impl Foo for i32 {
+  // method implementations fo here
+}
+```
