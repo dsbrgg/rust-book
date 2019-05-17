@@ -1,7 +1,0 @@
-[package]
-name = "prime_gap"
-version = "0.1.0"
-authors = ["opuzzz <dsbrgg@gmail.com>"]
-edition = "2018"
-
-[dependencies]

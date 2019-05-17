@@ -1,6 +1,0 @@
-[package]
-name = "bit_counter"
-version = "0.1.0"
-authors = ["opuzzz <dsbrgg@gmail.com>"]
-
-[dependencies]
